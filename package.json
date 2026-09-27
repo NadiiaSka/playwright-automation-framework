@@ -16,6 +16,7 @@
     "test:component": "vitest run tests/components",
     "test:integration": "vitest run tests/integration",
     "test:api": "playwright test tests/api --project=chrome",
+    "test:security": "playwright test tests/security --project=chrome",
     "test:functional": "playwright test tests/e2e/currency-conversion.spec.js --project=chrome",
     "test:accessibility": "playwright test tests/e2e/accessibility.spec.js --project=chrome",
     "test:visual": "playwright test tests/visual --project=chrome",

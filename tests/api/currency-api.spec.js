@@ -32,7 +32,7 @@ test.describe("Local currency API contract", () => {
 
     expect(response.status()).toBe(400);
     expect(await response.json()).toMatchObject({
-      error: expect.stringContaining("supported currencies"),
+      error: "Invalid conversion request",
     });
   });
 

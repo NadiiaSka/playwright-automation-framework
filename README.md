@@ -14,13 +14,18 @@ https://currency-exchange-nadiia.netlify.app
 The quality gate runs on pull requests to `main`, pushes to `main` and
 `develop`, and daily. Blocking checks are lint, production-mode compilation,
 component/unit tests, integration tests, API contract tests, browser functional
-tests, accessibility tests, and API input-validation security tests. The final
-`quality-gate` status summarizes only these required checks.
+tests, accessibility tests, application security tests, high-severity dependency
+audit, Gitleaks, and CodeQL. Pull-request dependency review is additionally
+blocking on PRs. The final `quality-gate` status summarizes required checks.
 
 Informational checks are the k6 performance smoke test, k6 load test, visual
-regression tests, Firefox/WebKit functional runs, and dependency audit. They
-upload their results but do not block merging while the suite and baselines
-mature.
+regression tests, and Firefox/WebKit functional runs. They upload their results
+but do not block merging while the suite and baselines mature.
+
+The blocking security checks include the `tests/security` Playwright suite,
+`npm audit --audit-level=high`, Gitleaks secret scanning, CodeQL JavaScript/
+TypeScript analysis, and high-severity dependency review on pull requests. The
+audit report and security test reports are uploaded even when a check fails.
 
 Tools used:
 
@@ -98,6 +103,7 @@ npm run build:ci
 npm run test:component
 npm run test:integration
 npm run test:api
+npm run test:security
 npm run test:functional
 npm run test:accessibility
 npm audit --audit-level=high
@@ -106,6 +112,26 @@ npm audit --audit-level=high
 Playwright starts the local API and Vite server through its configured
 `webServer` when they are not already running. Component and integration tests
 use MSW and do not require a live provider.
+
+### Security test scope
+
+The tagged `@security` Playwright suite checks local HTML/API security headers,
+API no-store behavior, same-origin-only access (CORS is not enabled), supported
+methods, content types, malformed and oversized JSON, strict field/type/range
+validation, non-reflective XSS/injection-like input rejection, and safe error
+responses. The local API runs on the ignored CI/local environment configuration;
+Playwright derives its URL from `VITE_APP_URL` or `BASE_URL`. No test credentials
+or tokens are needed or stored.
+
+This app currently has no authentication, authorization, login/logout, user
+resources, session cookies, database, shell commands, or rate limiter. Tests for
+credential validity, ownership/IDOR, revocation, cookie flags, SQL/NoSQL
+injection, and rate-limit responses are therefore not applicable. The API binds
+to loopback for local/CI use and intentionally emits no CORS allow headers.
+Strict production headers are provided in `public/_headers` for Netlify; the
+Vite development CSP allows the inline HMR bootstrap only in development. Do not
+interpret this regression suite as a penetration test or a complete security
+assessment.
 
 ### Visual regression tests
 

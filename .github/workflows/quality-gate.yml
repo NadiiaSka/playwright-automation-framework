@@ -82,7 +82,7 @@ jobs:
           if-no-files-found: ignore
 
   integration-tests:
-    name: Functional and integration tests (blocking)
+    name: Integration tests (blocking)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -119,18 +119,18 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Run API tests
         run: npm run test:api
-      - name: Upload API test reports
+      - name: Upload API reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-reports
+          name: api-reports
           path: |
             playwright-report/
             test-results/
           if-no-files-found: ignore
 
   functional-tests:
-    name: Browser functional tests (blocking)
+    name: Functional tests (blocking)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -143,13 +143,12 @@ jobs:
       - run: npm ci
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Run functional tests
-        run: npm run test:functional
-      - name: Upload functional test reports
+      - run: npm run test:functional
+      - name: Upload functional reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: functional-test-reports
+          name: functional-reports
           path: |
             playwright-report/
             test-results/
@@ -169,20 +168,19 @@ jobs:
       - run: npm ci
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Run accessibility tests
-        run: npm run test:accessibility
+      - run: npm run test:accessibility
       - name: Upload accessibility reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: accessibility-test-reports
+          name: accessibility-reports
           path: |
             playwright-report/
             test-results/
           if-no-files-found: ignore
 
   security-tests:
-    name: API input security tests (blocking)
+    name: Application security tests (blocking)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -193,24 +191,23 @@ jobs:
       - name: Prepare CI environment
         run: cp .env.ci.example .env.ci
       - run: npm ci
-      - name: Run API input validation security tests
-        run: |
-          npx playwright install --with-deps chromium
-          npx playwright test tests/api --project=chrome --grep "rejects"
-      - name: Upload security test reports
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run application security tests
+        run: npm run test:security
+      - name: Upload security reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-test-reports
+          name: security-reports
           path: |
             playwright-report/
             test-results/
           if-no-files-found: ignore
 
   dependency-audit:
-    name: Dependency audit (informational)
+    name: High-severity dependency audit (blocking)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -230,6 +227,51 @@ jobs:
           path: reports/npm-audit.json
           if-no-files-found: ignore
 
+  secret-scan:
+    name: Secret scanning (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan repository secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  codeql:
+    name: CodeQL static analysis (blocking)
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/autobuild@v3
+      - uses: github/codeql-action/analyze@v3
+
+  dependency-review:
+    name: Pull request dependency review (blocking)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
   performance-smoke:
     name: Performance smoke (informational)
     runs-on: ubuntu-latest
@@ -243,8 +285,7 @@ jobs:
       - name: Prepare CI environment
         run: cp .env.ci.example .env.ci
       - run: npm ci
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
+      - uses: grafana/setup-k6-action@v1
       - name: Start local test service
         shell: bash
         run: |
@@ -264,7 +305,7 @@ jobs:
           exit 1
       - name: Run k6 smoke test
         run: k6 run --summary-export=reports/k6-smoke-summary.json --env BASE_URL="$(grep '^VITE_APP_URL=' .env.ci | cut -d= -f2-)" tests/performance/health-smoke.js
-      - name: Upload performance smoke artifacts
+      - name: Upload performance artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -289,17 +330,15 @@ jobs:
       - run: npm ci
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Run visual comparisons against committed Linux baselines
-        run: npm run test:visual
-      - name: Upload visual reports and diffs
+      - run: npm run test:visual
+      - name: Upload visual reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: visual-regression-reports
+          name: visual-reports
           path: |
             playwright-report/
             test-results/
-            tests/visual/visual-regression.spec.js-snapshots/
           if-no-files-found: ignore
 
   load-tests:
@@ -315,8 +354,7 @@ jobs:
       - name: Prepare CI environment
         run: cp .env.ci.example .env.ci
       - run: npm ci
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
+      - uses: grafana/setup-k6-action@v1
       - name: Start local test service
         shell: bash
         run: |
@@ -359,10 +397,8 @@ jobs:
       - name: Prepare CI environment
         run: cp .env.ci.example .env.ci
       - run: npm ci
-      - name: Install Firefox and WebKit
-        run: npx playwright install --with-deps firefox webkit
-      - name: Run functional tests on Firefox and WebKit
-        run: npx playwright test tests/e2e/currency-conversion.spec.js --project=firefox --project=webkit
+      - run: npx playwright install --with-deps firefox webkit
+      - run: npx playwright test tests/e2e/currency-conversion.spec.js --project=firefox --project=webkit
       - name: Upload cross-browser reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -387,10 +423,8 @@ jobs:
       - name: Prepare CI environment
         run: cp .env.ci.example .env.ci
       - run: npm ci
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
-      - name: Regenerate Linux snapshots
-        run: npm run test:visual:update
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:visual:update
       - name: Upload regenerated baselines for review
         if: always()
         uses: actions/upload-artifact@v4
@@ -412,6 +446,10 @@ jobs:
       - functional-tests
       - accessibility-tests
       - security-tests
+      - dependency-audit
+      - secret-scan
+      - codeql
+      - dependency-review
     steps:
       - name: Require every blocking check to pass
         env:
@@ -423,11 +461,24 @@ jobs:
           FUNCTIONAL_RESULT: ${{ needs.functional-tests.result }}
           ACCESSIBILITY_RESULT: ${{ needs.accessibility-tests.result }}
           SECURITY_RESULT: ${{ needs.security-tests.result }}
+          AUDIT_RESULT: ${{ needs.dependency-audit.result }}
+          SECRET_SCAN_RESULT: ${{ needs.secret-scan.result }}
+          CODEQL_RESULT: ${{ needs.codeql.result }}
+          DEPENDENCY_REVIEW_RESULT: ${{ needs.dependency-review.result }}
+          IS_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
         run: |
-          for result in "$LINT_RESULT" "$COMPILE_RESULT" "$UNIT_RESULT" "$INTEGRATION_RESULT" "$API_RESULT" "$FUNCTIONAL_RESULT" "$ACCESSIBILITY_RESULT" "$SECURITY_RESULT"; do
+          for result in "$LINT_RESULT" "$COMPILE_RESULT" "$UNIT_RESULT" "$INTEGRATION_RESULT" "$API_RESULT" "$FUNCTIONAL_RESULT" "$ACCESSIBILITY_RESULT" "$SECURITY_RESULT" "$AUDIT_RESULT" "$SECRET_SCAN_RESULT" "$CODEQL_RESULT"; do
             if [ "$result" != "success" ]; then
               echo "A required quality check did not succeed: $result"
               exit 1
             fi
           done
+          if [ "$IS_PULL_REQUEST" = "true" ] && [ "$DEPENDENCY_REVIEW_RESULT" != "success" ]; then
+            echo "Dependency review did not succeed: $DEPENDENCY_REVIEW_RESULT"
+            exit 1
+          fi
+          if [ "$IS_PULL_REQUEST" != "true" ] && [ "$DEPENDENCY_REVIEW_RESULT" != "skipped" ] && [ "$DEPENDENCY_REVIEW_RESULT" != "success" ]; then
+            echo "Dependency review has an unexpected result: $DEPENDENCY_REVIEW_RESULT"
+            exit 1
+          fi
           echo "All required quality checks passed."

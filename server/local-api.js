@@ -2,22 +2,51 @@ import http from "node:http";
 
 const port = Number(process.env.API_PORT || 4174);
 const ratesToUsd = { USD: 1, EUR: 1.087, GBP: 1.282, UAH: 1 / 38.2 };
+const maxRequestBytes = 16 * 1024;
+const securityHeaders = {
+  "Content-Security-Policy":
+    "default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+  "Cache-Control": "no-store",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+  "Referrer-Policy": "no-referrer",
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+};
 
 const sendJson = (response, statusCode, body) => {
-  response.writeHead(statusCode, { "Content-Type": "application/json" });
+  response.writeHead(statusCode, {
+    ...securityHeaders,
+    "Content-Type": "application/json; charset=utf-8",
+  });
   response.end(JSON.stringify(body));
 };
 
 const readJson = (request) =>
   new Promise((resolve, reject) => {
-    let body = "";
+    const chunks = [];
+    let bytes = 0;
+    let oversized = false;
 
     request.on("data", (chunk) => {
-      body += chunk;
+      bytes += chunk.length;
+      if (bytes > maxRequestBytes) {
+        oversized = true;
+      } else if (!oversized) {
+        chunks.push(chunk);
+      }
     });
     request.on("end", () => {
+      if (oversized) {
+        reject(
+          Object.assign(new Error("Request body is too large"), {
+            statusCode: 413,
+          }),
+        );
+        return;
+      }
+
       try {
-        resolve(JSON.parse(body));
+        resolve(JSON.parse(Buffer.concat(chunks).toString("utf8")));
       } catch {
         reject(new Error("Request body must be valid JSON"));
       }
@@ -28,8 +57,8 @@ const readJson = (request) =>
 const server = http.createServer(async (request, response) => {
   if (request.url === "/api/health") {
     if (request.method !== "GET") {
-      response.writeHead(405, { Allow: "GET" });
-      response.end();
+      response.setHeader("Allow", "GET");
+      sendJson(response, 405, { error: "Method not allowed" });
       return;
     }
 
@@ -42,42 +71,70 @@ const server = http.createServer(async (request, response) => {
 
   if (request.url === "/api/convert") {
     if (request.method !== "POST") {
-      response.writeHead(405, { Allow: "POST" });
-      response.end();
+      response.setHeader("Allow", "POST");
+      sendJson(response, 405, { error: "Method not allowed" });
+      return;
+    }
+
+    if (
+      !/^application\/json(?:\s*;|$)/i.test(
+        request.headers["content-type"] || "",
+      )
+    ) {
+      sendJson(response, 415, {
+        error: "Content-Type must be application/json",
+      });
       return;
     }
 
     try {
-      const { amount, from, to } = await readJson(request);
-      const numericAmount = Number(amount);
+      const payload = await readJson(request);
+      const allowedFields = new Set(["amount", "from", "to"]);
+      const validObject =
+        payload !== null &&
+        typeof payload === "object" &&
+        !Array.isArray(payload);
+      const hasOnlySupportedFields =
+        validObject &&
+        Object.keys(payload).every((field) => allowedFields.has(field));
+      const { amount, from, to } = validObject ? payload : {};
 
       if (
-        !Number.isFinite(numericAmount) ||
+        !hasOnlySupportedFields ||
+        Object.keys(payload).length !== allowedFields.size ||
+        typeof amount !== "number" ||
+        !Number.isFinite(amount) ||
+        amount < 0 ||
+        amount > 1_000_000_000_000 ||
+        typeof from !== "string" ||
+        typeof to !== "string" ||
         !Object.hasOwn(ratesToUsd, from) ||
         !Object.hasOwn(ratesToUsd, to)
       ) {
-        sendJson(response, 400, {
-          error: "amount, from, and to must be valid supported currencies",
-        });
+        sendJson(response, 400, { error: "Invalid conversion request" });
         return;
       }
 
       const rate = ratesToUsd[from] / ratesToUsd[to];
       sendJson(response, 200, {
-        amount: numericAmount,
+        amount,
         from,
         to,
         rate,
-        convertedAmount: Math.round(numericAmount * rate * 100) / 100,
+        convertedAmount: Math.round(amount * rate * 100) / 100,
       });
     } catch (error) {
-      sendJson(response, 400, { error: error.message });
+      sendJson(response, error.statusCode || 400, {
+        error:
+          error.statusCode === 413
+            ? "Request body is too large"
+            : "Request body must be valid JSON",
+      });
     }
     return;
   }
 
-  response.writeHead(404);
-  response.end();
+  sendJson(response, 404, { error: "Not found" });
 });
 
 server.listen(port, "127.0.0.1", () => {
