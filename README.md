@@ -22,6 +22,34 @@ Informational checks are the k6 performance smoke test, k6 load test, visual
 regression tests, and Firefox/WebKit functional runs. They upload their results
 but do not block merging while the suite and baselines mature.
 
+### Allure historical reporting
+
+Allure adds detailed test results, durations, retries, and trend history on top
+of the existing Vitest JUnit and Playwright HTML reports. Every Vitest and
+Playwright test run writes raw results to the ignored root `allure-results/`
+directory, including runs with failed tests. No test rewrites are required.
+
+The Allure CLI requires a Java runtime. From a local test run, use:
+
+```bash
+npm run allure:generate
+npm run allure:open
+npm run allure:serve
+npm run allure:report
+```
+
+`allure:serve` generates and serves directly from the raw results. In CI, raw
+results and the generated HTML report are downloadable artifacts. Report
+generation and Pages publishing are non-blocking informational jobs; only the
+existing test and quality-gate jobs block merges.
+
+The report is published only after pushes to `main`. Once Pages is enabled and
+the first deployment succeeds, it will be available at
+[Allure historical report](https://NadiiaSka.github.io/playwright-automation-fraimework/).
+On first setup, enable GitHub Pages in repository settings and set its source
+to **GitHub Actions**. Trends accumulate from the history directory of the
+previously published report.
+
 The blocking security checks include the `tests/security` Playwright suite,
 `npm audit --audit-level=high`, Gitleaks secret scanning, CodeQL JavaScript/
 TypeScript analysis, and high-severity dependency review on pull requests. The

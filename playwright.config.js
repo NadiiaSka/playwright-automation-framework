@@ -11,9 +11,12 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   timeout: 30000,
-  reporter: process.env.CI
-    ? [["line"], ["html", { outputFolder: "playwright-report", open: "never" }]]
-    : "list",
+  reporter: [
+    ...(process.env.CI
+      ? [["line"], ["html", { outputFolder: "playwright-report", open: "never" }]]
+      : [["list"]]),
+    ["allure-playwright", { resultsDir: "allure-results" }],
+  ],
   expect: {
     timeout: 10000,
     toHaveScreenshot: {

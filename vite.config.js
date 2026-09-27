@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
+import AllureReporter from "allure-vitest/reporter";
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -31,7 +32,12 @@ export default defineConfig(({ mode }) => {
       environment: "jsdom",
       globals: true,
       include: ["tests/**/*.test.{js,jsx}"],
-      setupFiles: "./tests/setup.js",
+      setupFiles: ["allure-vitest/setup", "./tests/setup.js"],
+      reporters: [
+        "default",
+        "junit",
+        new AllureReporter({ resultsDir: "allure-results" }),
+      ],
       exclude: [
         "**/api/**",
         "**/e2e/**",

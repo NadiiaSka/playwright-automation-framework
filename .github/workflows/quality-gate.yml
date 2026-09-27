@@ -72,13 +72,20 @@ jobs:
       - name: Run component tests
         run: |
           mkdir -p reports
-          npx vitest run tests/components --reporter=junit --outputFile=reports/unit-tests.xml
+          npx vitest run tests/components --outputFile=reports/unit-tests.xml
       - name: Upload unit test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: unit-test-report
           path: reports/unit-tests.xml
+          if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
           if-no-files-found: ignore
 
   integration-tests:
@@ -94,13 +101,20 @@ jobs:
       - name: Run integration tests
         run: |
           mkdir -p reports
-          npx vitest run tests/integration --reporter=junit --outputFile=reports/integration-tests.xml
+          npx vitest run tests/integration --outputFile=reports/integration-tests.xml
       - name: Upload integration test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: integration-test-report
           path: reports/integration-tests.xml
+          if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
           if-no-files-found: ignore
 
   api-tests:
@@ -128,6 +142,13 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
+          if-no-files-found: ignore
 
   functional-tests:
     name: Functional tests (blocking)
@@ -152,6 +173,13 @@ jobs:
           path: |
             playwright-report/
             test-results/
+          if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
           if-no-files-found: ignore
 
   accessibility-tests:
@@ -178,6 +206,13 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
+          if-no-files-found: ignore
 
   security-tests:
     name: Application security tests (blocking)
@@ -203,6 +238,13 @@ jobs:
           path: |
             playwright-report/
             test-results/
+          if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
           if-no-files-found: ignore
 
   dependency-audit:
@@ -340,6 +382,13 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
+          if-no-files-found: ignore
 
   load-tests:
     name: Load tests (informational)
@@ -408,6 +457,13 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
+          if-no-files-found: ignore
 
   regenerate-visual-baselines:
     name: Regenerate Linux visual baselines (manual)
@@ -432,6 +488,100 @@ jobs:
           name: regenerated-linux-visual-baselines
           path: tests/visual/visual-regression.spec.js-snapshots/*-linux.png
           if-no-files-found: error
+      - name: Upload Allure raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ github.job }}
+          path: allure-results/
+          if-no-files-found: ignore
+
+  allure-report:
+    name: Allure report (informational)
+    if: always()
+    continue-on-error: true
+    needs:
+      - unit-tests
+      - integration-tests
+      - api-tests
+      - functional-tests
+      - accessibility-tests
+      - security-tests
+      - visual-regression
+      - cross-browser-tests
+      - regenerate-visual-baselines
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - run: npm ci
+      - name: Download Allure raw results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: allure-results-*
+          path: allure-results
+          merge-multiple: true
+      - name: Restore history from the published report
+        shell: bash
+        env:
+          ALLURE_PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+        run: |
+          mkdir -p allure-results/history
+          for file in history.json history-trend.json duration-trend.json retry-trend.json categories-trend.json; do
+            target="allure-results/history/$file"
+            if curl --fail --silent --location "$ALLURE_PAGES_URL/history/$file" --output "$target.tmp"; then
+              mv "$target.tmp" "$target"
+            else
+              rm -f "$target.tmp"
+            fi
+          done
+      - name: Generate Allure HTML report
+        run: npm run allure:generate
+      - name: Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report/
+          if-no-files-found: ignore
+
+  publish-allure-pages:
+    name: Publish Allure report to GitHub Pages (informational)
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: allure-report
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Allure HTML report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+      - uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
   quality-gate:
     name: quality-gate
