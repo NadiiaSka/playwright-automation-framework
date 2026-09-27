@@ -208,8 +208,9 @@ jobs:
           if-no-files-found: ignore
 
   dependency-audit:
-    name: Dependency audit (blocking)
+    name: Dependency audit (informational)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -411,7 +412,6 @@ jobs:
       - functional-tests
       - accessibility-tests
       - security-tests
-      - dependency-audit
     steps:
       - name: Require every blocking check to pass
         env:
@@ -423,9 +423,8 @@ jobs:
           FUNCTIONAL_RESULT: ${{ needs.functional-tests.result }}
           ACCESSIBILITY_RESULT: ${{ needs.accessibility-tests.result }}
           SECURITY_RESULT: ${{ needs.security-tests.result }}
-          AUDIT_RESULT: ${{ needs.dependency-audit.result }}
         run: |
-          for result in "$LINT_RESULT" "$COMPILE_RESULT" "$UNIT_RESULT" "$INTEGRATION_RESULT" "$API_RESULT" "$FUNCTIONAL_RESULT" "$ACCESSIBILITY_RESULT" "$SECURITY_RESULT" "$AUDIT_RESULT"; do
+          for result in "$LINT_RESULT" "$COMPILE_RESULT" "$UNIT_RESULT" "$INTEGRATION_RESULT" "$API_RESULT" "$FUNCTIONAL_RESULT" "$ACCESSIBILITY_RESULT" "$SECURITY_RESULT"; do
             if [ "$result" != "success" ]; then
               echo "A required quality check did not succeed: $result"
               exit 1

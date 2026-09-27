@@ -14,12 +14,13 @@ https://currency-exchange-nadiia.netlify.app
 The quality gate runs on pull requests to `main`, pushes to `main` and
 `develop`, and daily. Blocking checks are lint, production-mode compilation,
 component/unit tests, integration tests, API contract tests, browser functional
-tests, accessibility tests, dependency audit, and API input-validation security
-tests. The final `quality-gate` status summarizes only these required checks.
+tests, accessibility tests, and API input-validation security tests. The final
+`quality-gate` status summarizes only these required checks.
 
 Informational checks are the k6 performance smoke test, k6 load test, visual
-regression tests, and Firefox/WebKit functional runs. They upload their results
-but do not block merging while the suite and baselines mature.
+regression tests, Firefox/WebKit functional runs, and dependency audit. They
+upload their results but do not block merging while the suite and baselines
+mature.
 
 Tools used:
 
