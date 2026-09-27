@@ -13,7 +13,10 @@ export default defineConfig({
   timeout: 30000,
   reporter: [
     ...(process.env.CI
-      ? [["line"], ["html", { outputFolder: "playwright-report", open: "never" }]]
+      ? [
+          ["line"],
+          ["html", { outputFolder: "playwright-report", open: "never" }],
+        ]
       : [["list"]]),
     ["allure-playwright", { resultsDir: "allure-results" }],
   ],
