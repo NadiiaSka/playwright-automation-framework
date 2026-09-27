@@ -25,7 +25,7 @@ const renderSelectCountry = ({
 
 describe("Select Country", () => {
   describe("Positive", () => {
-    it("CT-SEL-01: Country selector shows relevant country options when opened", async () => {
+    it("Country selector shows relevant country options when opened", async () => {
       const user = userEvent.setup();
       const setValue = vi.fn();
       renderSelectCountry({ setValue, label: "from" });
@@ -40,7 +40,7 @@ describe("Select Country", () => {
       expect(option).toBeInTheDocument();
     });
 
-    it("CT-SEL-02: Country selector calls the setter with the selected country", async () => {
+    it("Country selector calls the setter with the selected country", async () => {
       const user = userEvent.setup();
       const setValue = vi.fn();
       renderSelectCountry({ setValue, label: "from" });
@@ -58,7 +58,7 @@ describe("Select Country", () => {
   });
 
   describe("Negative", () => {
-    it("CT-SEL-03: Country selector ignores a stale or unavailable value", async () => {
+    it("Country selector ignores a stale or unavailable value", async () => {
       const setValue = vi.fn();
       const unavailableValue = {
         name: { common: "Not a real place" },
@@ -75,7 +75,7 @@ describe("Select Country", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("CT-SEL-04: Country selector still renders an empty combobox when no valid match is selected", async () => {
+    it("Country selector still renders an empty combobox when no valid match is selected", async () => {
       const setValue = vi.fn();
       renderSelectCountry({ setValue, label: "to" });
       const input = await screen.findByRole("combobox", { name: /to/i });
@@ -84,7 +84,7 @@ describe("Select Country", () => {
   });
 
   describe("Edge", () => {
-    it("CT-SEL-05: Country selector renders a neutral state while data is loading", async () => {
+    it("Country selector renders a neutral state while data is loading", async () => {
       const setValue = vi.fn();
       renderSelectCountry({ setValue, label: "from" });
 
@@ -96,7 +96,7 @@ describe("Select Country", () => {
       expect(input).toBeInTheDocument();
     });
 
-    it("CT-SEL-06: Country selector preserves the selected display label format", async () => {
+    it("Country selector preserves the selected display label format", async () => {
       const selectedValue = {
         name: { common: "United States" },
         flags: { png: "https://example.com/us.png" },

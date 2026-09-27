@@ -10,7 +10,6 @@ Produce a complete test matrix for the feature using the real app behavior, not 
 
 Each test case must use this format:
 
-- ID: a unique identifier such as `TC-01`
 - Title: a short behavior-focused title, for example: `Login rejects empty password`
 - Preconditions: the setup needed before the action starts
 - Steps: the exact user or system actions to perform

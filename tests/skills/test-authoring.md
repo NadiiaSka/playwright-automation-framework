@@ -55,7 +55,6 @@ Use them to verify:
 
 Each test case must follow this exact format:
 
-- ID: unique identifier such as `TC-01`
 - Title: behavior-based and specific, for example `Login rejects empty password`
 - Preconditions: setup required before the action begins
 - Steps: clear sequence of actions

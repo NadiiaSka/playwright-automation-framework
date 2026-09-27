@@ -31,7 +31,7 @@ const renderSwitchCurrency = ({
 
 describe("Switch Currency", () => {
   describe("Positive", () => {
-    it("CT-SWC-01: Swap button exchanges source and target values when both are selected", async () => {
+    it("Swap button exchanges source and target values when both are selected", async () => {
       const user = userEvent.setup();
       const fromCurrency = { name: { common: "United States" } };
       const toCurrency = { name: { common: "Ukraine" } };
@@ -48,7 +48,7 @@ describe("Switch Currency", () => {
   });
 
   describe("Negative", () => {
-    it("CT-SWC-02: Swap button does not crash when selections are empty", async () => {
+    it("Swap button does not crash when selections are empty", async () => {
       const user = userEvent.setup();
       const { button, setFromCurrency, setToCurrency } = renderSwitchCurrency();
 
@@ -60,7 +60,7 @@ describe("Switch Currency", () => {
   });
 
   describe("Edge", () => {
-    it("CT-SWC-03: Swap button still attempts the swap when only one side is selected", async () => {
+    it("Swap button still attempts the swap when only one side is selected", async () => {
       const user = userEvent.setup();
       const fromCurrency = { name: { common: "United States" } };
       const { button, setFromCurrency, setToCurrency } = renderSwitchCurrency({

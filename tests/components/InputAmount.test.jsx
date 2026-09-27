@@ -21,7 +21,7 @@ const renderInputAmount = (initialValue = "") => {
 
 describe("Amount Input", () => {
   describe("Positive", () => {
-    it("CT-IA-01: Amount input accepts a valid numeric value", async () => {
+    it("Amount input accepts a valid numeric value", async () => {
       const user = userEvent.setup();
       const { input } = renderInputAmount("");
 
@@ -30,7 +30,7 @@ describe("Amount Input", () => {
       expect(input).toHaveDisplayValue(["1,234"]);
     });
 
-    it("CT-IA-02: Amount input accepts a decimal value", async () => {
+    it("Amount input accepts a decimal value", async () => {
       const user = userEvent.setup();
       const { input } = renderInputAmount("");
 
@@ -41,7 +41,7 @@ describe("Amount Input", () => {
   });
 
   describe("Negative", () => {
-    it("CT-IA-03: Amount input rejects invalid characters", async () => {
+    it("Amount input rejects invalid characters", async () => {
       const user = userEvent.setup();
       const { input } = renderInputAmount("");
 
@@ -50,7 +50,7 @@ describe("Amount Input", () => {
       expect(input).toHaveDisplayValue("");
     });
 
-    it("CT-IA-04: Amount input rejects negative values", async () => {
+    it("Amount input rejects negative values", async () => {
       const user = userEvent.setup();
       const { input } = renderInputAmount("");
 
@@ -61,7 +61,7 @@ describe("Amount Input", () => {
   });
 
   describe("Edge", () => {
-    it("CT-IA-05: Amount input accepts zero", async () => {
+    it("Amount input accepts zero", async () => {
       const user = userEvent.setup();
       const { input } = renderInputAmount("");
 
@@ -70,7 +70,7 @@ describe("Amount Input", () => {
       expect(input).toHaveDisplayValue("0");
     });
 
-    it("CT-IA-06: Amount input keeps empty state when cleared", async () => {
+    it("Amount input keeps empty state when cleared", async () => {
       const user = userEvent.setup();
       const { input } = renderInputAmount("500");
 
@@ -79,7 +79,7 @@ describe("Amount Input", () => {
       expect(input).toHaveDisplayValue("");
     });
 
-    it("CT-IA-07: Amount input retains the entered value after typing repeatedly", async () => {
+    it("Amount input retains the entered value after typing repeatedly", async () => {
       const user = userEvent.setup();
       const { input } = renderInputAmount("");
 

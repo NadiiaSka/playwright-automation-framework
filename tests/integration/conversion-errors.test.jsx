@@ -45,7 +45,7 @@ describe("conversion errors", () => {
     window.localStorage.clear();
   });
 
-  it("IT-ERR-01: shows a safe fallback error message when the API fails", async () => {
+  it("shows a safe fallback error message when the API fails", async () => {
     const user = userEvent.setup();
 
     server.use(
@@ -78,7 +78,7 @@ describe("conversion errors", () => {
     });
   });
 
-  it("IT-ERR-02: shows a safe fallback when the API returns a malformed response", async () => {
+  it("shows a safe fallback when the API returns a malformed response", async () => {
     const user = userEvent.setup();
 
     server.use(
@@ -111,7 +111,7 @@ describe("conversion errors", () => {
     });
   });
 
-  it("IT-ERR-03: shows a safe fallback when the API request is rejected", async () => {
+  it("shows a safe fallback when the API request is rejected", async () => {
     const user = userEvent.setup();
 
     server.use(

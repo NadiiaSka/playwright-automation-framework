@@ -45,7 +45,7 @@ describe("currency flow", () => {
     window.localStorage.clear();
   });
 
-  it("IT-FLOW-01: converts a valid amount when both currencies are selected", async () => {
+  it("converts a valid amount when both currencies are selected", async () => {
     const user = userEvent.setup();
     renderApp();
 
@@ -70,7 +70,7 @@ describe("currency flow", () => {
     });
   });
 
-  it("IT-FLOW-02: accepts zero as a valid amount and shows a zero conversion result", async () => {
+  it("accepts zero as a valid amount and shows a zero conversion result", async () => {
     const user = userEvent.setup();
     renderApp();
 
@@ -95,7 +95,7 @@ describe("currency flow", () => {
     });
   });
 
-  it("IT-FLOW-03: returns zero when converting zero from a smaller currency to a larger one", async () => {
+  it("returns zero when converting zero from a smaller currency to a larger one", async () => {
     const user = userEvent.setup();
 
     server.use(
@@ -134,7 +134,7 @@ describe("currency flow", () => {
     });
   });
 
-  it("IT-FLOW-04: does not trigger a conversion if the amount is empty", async () => {
+  it("does not trigger a conversion if the amount is empty", async () => {
     const user = userEvent.setup();
     renderApp();
 
@@ -154,7 +154,7 @@ describe("currency flow", () => {
     expect(screen.queryByText(/\d+\s+UAH/i)).not.toBeInTheDocument();
   });
 
-  it("IT-FLOW-05: does not show a conversion when one currency is missing", async () => {
+  it("does not show a conversion when one currency is missing", async () => {
     const user = userEvent.setup();
     renderApp();
 
@@ -171,7 +171,7 @@ describe("currency flow", () => {
     expect(screen.queryByText(/\d+\s+UAH/i)).not.toBeInTheDocument();
   });
 
-  it("IT-FLOW-05: updates the conversion when the user switches the currency direction", async () => {
+  it("updates the conversion when the user switches the currency direction", async () => {
     const user = userEvent.setup();
     renderApp();
 
