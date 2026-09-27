@@ -45,7 +45,7 @@ existing test and quality-gate jobs block merges.
 
 The report is published only after pushes to `main`. Once Pages is enabled and
 the first deployment succeeds, it will be available at
-[Allure historical report](https://NadiiaSka.github.io/playwright-automation-fraimework/).
+[Allure historical report](https://NadiiaSka.github.io/playwright-automation-framework/).
 On first setup, enable GitHub Pages in repository settings and set its source
 to **GitHub Actions**. Trends accumulate from the history directory of the
 previously published report.
