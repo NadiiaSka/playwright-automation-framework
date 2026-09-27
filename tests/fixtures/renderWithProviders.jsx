@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import PropTypes from "prop-types";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { CurrencyContext } from "../../src/context/CurrencyContext";
 import { defaultCurrencyState } from "./defaultCurrencyState";
@@ -33,6 +34,9 @@ export const renderWithProviders = ({
       </CurrencyContext.Provider>
     </QueryClientProvider>
   );
+  Wrapper.propTypes = {
+    children: PropTypes.node.isRequired,
+  };
 
   return render(ui, { wrapper: Wrapper });
 };

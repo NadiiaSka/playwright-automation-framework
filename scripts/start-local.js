@@ -5,12 +5,6 @@ const mode = process.argv[2] || "local";
 const env = loadEnv(mode, process.cwd(), "");
 const children = [];
 
-const start = (command, args) => {
-  const child = spawn(command, args, { stdio: "inherit" });
-  children.push(child);
-  return child;
-};
-
 const childEnv = {
   ...process.env,
   API_PORT: env.VITE_API_PORT,

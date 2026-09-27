@@ -28,6 +28,7 @@ test.describe("Currency converter visual regression", () => {
     });
 
     await page.goto("/");
+    await expect(page.getByLabel("Amount")).toBeVisible();
   });
 
   test("matches the initial page snapshot", async ({ page }) => {

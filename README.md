@@ -11,20 +11,23 @@ https://currency-exchange-nadiia.netlify.app
 
 ## Testing
 
-The project uses a layered testing approach to keep the app reliable and easy to maintain:
+The quality gate runs on pull requests to `main`, pushes to `main` and
+`develop`, and daily. Blocking checks are lint, production-mode compilation,
+component/unit tests, integration tests, API contract tests, browser functional
+tests, accessibility tests, dependency audit, and API input-validation security
+tests. The final `quality-gate` status summarizes only these required checks.
 
-- Component and unit tests validate rendering, user interactions, and form logic.
-- Integration tests cover the main conversion flow and error handling.
-- End-to-end tests verify the app in a real browser.
-  Coverage focuses on currency selection, amount input, conversion behavior, switching currencies, and failure states.
+Informational checks are the k6 performance smoke test, k6 load test, visual
+regression tests, and Firefox/WebKit functional runs. They upload their results
+but do not block merging while the suite and baselines mature.
 
 Tools used:
 
-- Vitest + Testing Library for fast UI and component tests
-- Playwright for browser-level regression testing
-- MSW for mocking API responses
-
-The CI/CD pipeline is configured in GitHub Actions and runs automated checks on push and pull request events.
+- Vitest + Testing Library for component and integration tests
+- Playwright for API, functional, accessibility, visual, and cross-browser tests
+- MSW for deterministic provider responses in component/integration tests
+- k6 for HTTP performance smoke and load tests
+- `npm audit` for dependency vulnerability auditing
 
 ```mermaid
 flowchart TD
@@ -51,6 +54,7 @@ flowchart TD
 - Playwright
 - MSW
 - k6
+- axe-core
 
 ## Quick start
 
@@ -73,16 +77,79 @@ Required:
 ```bash
 git clone https://github.com/NadiiaSka/playwright-automation-fraimework.git
 cd playwright-automation-fraimework
-npm install
+npm ci
 npx playwright install
 ```
 
-### Run the full test suite
+Create the ignored local environment file before starting the app or running
+Playwright tests:
 
 ```bash
-npm run test:run
-npm run test:end-end
+cp .env.local.example .env.local
+cp .env.ci.example .env.ci
 ```
+
+### Run test categories locally
+
+```bash
+npm run lint
+npm run build:ci
+npm run test:component
+npm run test:integration
+npm run test:api
+npm run test:functional
+npm run test:accessibility
+npm audit --audit-level=high
+```
+
+Playwright starts the local API and Vite server through its configured
+`webServer` when they are not already running. Component and integration tests
+use MSW and do not require a live provider.
+
+### Visual regression tests
+
+Run screenshot comparisons with the committed platform baselines:
+
+```bash
+npm run test:visual
+```
+
+Normal CI never updates snapshots. Linux baselines are generated on Ubuntu by
+opening the `Quality Gate` workflow with `workflow_dispatch` and setting
+`regenerate_visual_baselines` to `true`. Review and commit the downloaded
+`regenerated-linux-visual-baselines` artifact; do not copy Windows snapshots
+over Linux baselines. To regenerate locally, use Linux and run:
+
+```bash
+npm run test:visual:update
+```
+
+Visual tests use deterministic API responses, `en-US`, UTC, disabled screenshot
+animations, and a 2% maximum pixel-difference ratio.
+
+### Performance and load tests
+
+Install [k6](https://grafana.com/docs/k6/latest/set-up/install-k6/), start the
+local app with `npm run dev`, then set the app URL and run either profile:
+
+```bash
+BASE_URL=http://127.0.0.1:5173 npm run test:performance:smoke
+BASE_URL=http://127.0.0.1:5173 npm run test:performance:health
+```
+
+The smoke profile sends five requests from one virtual user. The load profile
+runs five virtual users for 30 seconds and checks failure rate and p95 latency.
+
+### Cross-browser tests
+
+```bash
+npx playwright install firefox webkit
+npm run test:cross-browser
+```
+
+The informational CI cross-browser job currently runs the currency functional
+flow on Firefox and WebKit; Chromium functional and accessibility checks are
+blocking.
 
 ### Run the health performance test
 
@@ -147,7 +214,7 @@ npm run build:ci
 npm run build:production
 ```
 
-The GitHub Actions workflow builds and runs E2E tests using CI mode. A static
+The GitHub Actions quality gate builds and tests using CI mode. A static
 production build is produced in `dist`; deploy it with the hosting provider of
-your choice. The Vite health endpoint is for development, CI, and preview only;
-a production API needs its own backend health endpoint.
+your choice. The local API service is for development and CI; production should
+point at the deployed API provider through environment configuration.

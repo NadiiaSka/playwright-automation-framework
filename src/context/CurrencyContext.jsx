@@ -1,4 +1,6 @@
-import React, { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
+
 export const CurrencyContext = createContext();
 
 const readStoredCountry = (storageKey) => {
@@ -75,6 +77,10 @@ const CurrencyProvider = ({ children }) => {
       {children}
     </CurrencyContext.Provider>
   );
+};
+
+CurrencyProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default CurrencyProvider;

@@ -15,6 +15,9 @@
     "test:run": "vitest run",
     "test:component": "vitest run tests/components",
     "test:integration": "vitest run tests/integration",
+    "test:api": "playwright test tests/api --project=chrome",
+    "test:functional": "playwright test tests/e2e/currency-conversion.spec.js --project=chrome",
+    "test:accessibility": "playwright test tests/e2e/accessibility.spec.js --project=chrome",
     "test:visual": "playwright test tests/visual --project=chrome",
     "test:visual:update": "playwright test tests/visual --project=chrome --update-snapshots",
     "test:end-end": "playwright test tests/e2e",
@@ -23,6 +26,7 @@
     "test:firefox": "playwright test --project=firefox",
     "test:webkit": "playwright test --project=webkit",
     "test:cross-browser": "playwright test",
+    "test:performance:smoke": "k6 run tests/performance/health-smoke.js",
     "test:performance:health": "k6 run tests/performance/health.js"
   },
   "dependencies": {

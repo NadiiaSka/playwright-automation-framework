@@ -10,16 +10,6 @@ const selectCurrency = async (page, fieldName, optionText) => {
     .click();
 };
 
-test("reports that the local API is healthy", async ({ request }) => {
-  const response = await request.get("/api/health");
-
-  expect(response.status()).toBe(200);
-  expect(await response.json()).toMatchObject({
-    status: "ok",
-    timestamp: expect.any(String),
-  });
-});
-
 test.describe("Currency converter end-to-end flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.route("**/api/convert", async (route) => {
