@@ -22,11 +22,8 @@ test("reports that the local API is healthy", async ({ request }) => {
 
 test.describe("Currency converter end-to-end flow", () => {
   test.beforeEach(async ({ page }) => {
-    await page.route("**/api.fxratesapi.com/latest**", async (route) => {
-      const url = new URL(route.request().url());
-      const amount = Number(url.searchParams.get("amount") ?? 0);
-      const base = url.searchParams.get("base");
-      const target = url.searchParams.get("currencies");
+    await page.route("**/api/convert", async (route) => {
+      const { amount, from, to } = route.request().postDataJSON();
 
       const rates = {
         USD: 1,
@@ -35,20 +32,18 @@ test.describe("Currency converter end-to-end flow", () => {
         GBP: 0.78,
       };
 
-      const converted = (amount * rates[target]) / rates[base];
+      const converted = (amount * rates[to]) / rates[from];
 
       await route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
-          rates: {
-            [target]: Number(converted.toFixed(2)),
-          },
+          convertedAmount: Number(converted.toFixed(2)),
         }),
       });
     });
 
-    await page.goto("http://localhost:5173");
+    await page.goto("/");
   });
 
   test("converts a valid amount and shows the result", async ({ page }) => {
@@ -94,7 +89,7 @@ test.describe("Currency converter end-to-end flow", () => {
     page,
   }) => {
     await page.unrouteAll();
-    await page.route("**/api.fxratesapi.com/latest**", async (route) => {
+    await page.route("**/api/convert", async (route) => {
       await route.fulfill({
         status: 500,
         contentType: "application/json",

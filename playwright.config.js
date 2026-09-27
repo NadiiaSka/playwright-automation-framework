@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+import { loadEnv } from "vite";
+
+const env = loadEnv("ci", process.cwd(), "");
+const appUrl = process.env.BASE_URL || env.VITE_APP_URL;
 
 export default defineConfig({
   testDir: "./tests",
@@ -9,7 +13,7 @@ export default defineConfig({
     timeout: 10000,
   },
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: appUrl,
     headless: true,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
@@ -30,8 +34,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev:ci -- --host 127.0.0.1 --port 5173",
-    url: "http://127.0.0.1:5173",
+    command: "npm run dev:ci",
+    url: `${appUrl}/api/health`,
     reuseExistingServer: true,
     timeout: 120000,
   },

@@ -1,7 +1,11 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
 
-const baseUrl = __ENV.BASE_URL || "http://127.0.0.1:5173";
+const baseUrl = __ENV.BASE_URL;
+
+if (!baseUrl) {
+  throw new Error("BASE_URL must be provided for the k6 performance test");
+}
 
 export const options = {
   scenarios: {

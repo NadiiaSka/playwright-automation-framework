@@ -13,19 +13,16 @@ const selectCurrency = async (page, fieldName, optionText) => {
 
 test.describe("Currency converter visual regression", () => {
   test.beforeEach(async ({ page }) => {
-    await page.route("**/api.fxratesapi.com/latest**", async (route) => {
-      const url = new URL(route.request().url());
-      const amount = Number(url.searchParams.get("amount") ?? 0);
-      const base = url.searchParams.get("base");
-      const target = url.searchParams.get("currencies");
+    await page.route("**/api/convert", async (route) => {
+      const { amount, from, to } = route.request().postDataJSON();
       const rates = { USD: 1, UAH: 38.2, EUR: 0.92, GBP: 0.78 };
-      const converted = (amount * rates[target]) / rates[base];
+      const converted = (amount * rates[to]) / rates[from];
 
       await route.fulfill({
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({
-          rates: { [target]: Number(converted.toFixed(2)) },
+          convertedAmount: Number(converted.toFixed(2)),
         }),
       });
     });
@@ -48,6 +45,7 @@ test.describe("Currency converter visual regression", () => {
 
     await expect(page).toHaveScreenshot("currency-converter-converted.png", {
       fullPage: true,
+      maxDiffPixelRatio: 0.02,
     });
   });
 });

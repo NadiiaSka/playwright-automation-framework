@@ -4,8 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite --mode local",
-    "dev:ci": "vite --mode ci",
+    "dev": "node scripts/start-local.js local",
+    "dev:ci": "node scripts/start-local.js ci",
     "build": "vite build --mode production",
     "build:ci": "vite build --mode ci",
     "build:production": "vite build --mode production",

@@ -60,6 +60,9 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Prepare CI environment
+        run: cp .env.ci.example .env.ci
+
       - name: Install dependencies
         run: npm ci
 
@@ -98,6 +101,9 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Prepare CI environment
+        run: cp .env.ci.example .env.ci
+
       - name: Install dependencies
         run: npm ci
 
@@ -107,10 +113,14 @@ jobs:
       - name: Start CI server
         shell: bash
         run: |
-          npm run dev:ci -- --host 127.0.0.1 --port 5173 --strictPort > vite.log 2>&1 &
+          set -a
+          source .env.ci
+          set +a
+          export BASE_URL="$VITE_APP_URL"
+          npm run dev:ci > vite.log 2>&1 &
           server_pid=$!
           for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:5173/api/health > /dev/null; then
+            if curl --fail --silent "$BASE_URL/api/health" > /dev/null; then
               exit 0
             fi
             if ! kill -0 "$server_pid" 2>/dev/null; then
@@ -125,7 +135,7 @@ jobs:
           exit 1
 
       - name: Run k6 health load test
-        run: k6 run tests/performance/health.js
+        run: k6 run --env BASE_URL="$(grep '^VITE_APP_URL=' .env.ci | cut -d= -f2-)" tests/performance/health.js
 
       - name: Upload Vite log on failure
         if: failure()

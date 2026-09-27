@@ -129,10 +129,12 @@ npm run test:end-end
 
 ## Environments
 
-The app uses Vite modes to configure the exchange-rate API URL. The committed
-configuration files are `.env.ci` and `.env.production`; create `.env.local`
-from `.env.example` for developer-specific values. Do not commit API keys in
-any `VITE_` variable because Vite exposes them to the browser bundle.
+The app uses Vite modes to configure the exchange-rate API URL. Safe example
+templates are committed as `.env.ci.example` and `.env.production.example`.
+CI copies `.env.ci.example` to its ignored `.env.ci` before building or starting
+the local server. For local development, copy `.env.local.example` to
+`.env.local`. Real `.env.*` files stay ignored. Never put API keys in `VITE_`
+variables because Vite exposes them to browser bundles.
 
 ```bash
 # Local development
