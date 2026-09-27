@@ -14,13 +14,14 @@ https://currency-exchange-nadiia.netlify.app
 The quality gate runs on pull requests to `main`, pushes to `main` and
 `develop`, and daily. Blocking checks are lint, production-mode compilation,
 component/unit tests, integration tests, API contract tests, browser functional
-tests, accessibility tests, application security tests, high-severity dependency
-audit, Gitleaks, and CodeQL. Pull-request dependency review is additionally
-blocking on PRs. The final `quality-gate` status summarizes required checks.
+tests, accessibility tests, application security tests, Gitleaks, and CodeQL.
+Pull-request dependency review is additionally blocking on PRs. The final
+`quality-gate` status summarizes required checks.
 
 Informational checks are the k6 performance smoke test, k6 load test, visual
-regression tests, and Firefox/WebKit functional runs. They upload their results
-but do not block merging while the suite and baselines mature.
+regression tests, Firefox/WebKit functional runs, and the high-severity
+dependency audit. They upload their results but do not block merging while the
+suite and baselines mature.
 
 ### Allure historical reporting
 
@@ -43,7 +44,7 @@ results and the generated HTML report are downloadable artifacts. Report
 generation and Pages publishing are non-blocking informational jobs; only the
 existing test and quality-gate jobs block merges.
 
-The report is published only after pushes to `main`. Once Pages is enabled and
+The report is published only after pushes to `master`. Once Pages is enabled and
 the first deployment succeeds, it will be available at
 [Allure historical report](https://NadiiaSka.github.io/playwright-automation-framework/).
 On first setup, enable GitHub Pages in repository settings and set its source
@@ -51,9 +52,10 @@ to **GitHub Actions**. Trends accumulate from the history directory of the
 previously published report.
 
 The blocking security checks include the `tests/security` Playwright suite,
-`npm audit --audit-level=high`, Gitleaks secret scanning, CodeQL JavaScript/
-TypeScript analysis, and high-severity dependency review on pull requests. The
-audit report and security test reports are uploaded even when a check fails.
+Gitleaks secret scanning, CodeQL JavaScript/TypeScript analysis, and
+high-severity dependency review on pull requests. The `npm audit --audit-level=high`
+dependency audit is informational; its report and the security test reports are
+uploaded even when a check fails.
 
 Tools used:
 
