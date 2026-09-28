@@ -217,6 +217,8 @@ In CI, the non-blocking **Allure report** job uploads the report as the
 `allure-report` artifact. On pushes to `master`, the non-blocking Pages job
 publishes it with history restored from the previous report:
 
+![Allure report overview showing the current run summary, suite results, and trend chart](docs/images/allure-report.png)
+
 [View the Allure report](https://NadiiaSka.github.io/playwright-automation-framework/)
 
 Trend history is available after a successful Pages deployment. The reporting
