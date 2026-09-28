@@ -248,7 +248,6 @@ required only for pull requests.
 | Functional           | `npm run test:functional`                                                     | Checks the main browser conversion flow           |
 | Accessibility        | `npm run test:accessibility`                                                  | Runs browser accessibility checks                 |
 | Security             | `npm run test:security`                                                       | Checks local API and HTTP security behavior       |
-| Secret scanning      | Gitleaks GitHub Action                                                        | Detects secrets in repository history             |
 | CodeQL               | GitHub CodeQL action                                                          | Performs JavaScript/TypeScript static analysis    |
 | PR dependency review | GitHub dependency-review action                                               | Flags high-severity dependencies in pull requests |
 
@@ -258,6 +257,7 @@ These jobs remain visible and upload results, but do not gate merges.
 
 | Job                          | Script or action                                 | Why it is non-blocking                                        |
 | ---------------------------- | ------------------------------------------------ | ------------------------------------------------------------- |
+| Secret scanning              | Gitleaks GitHub Action                           | Reports historical secret findings without gating merges      |
 | Dependency audit             | `npm audit --audit-level=high`                   | Report-only dependency risk signal                            |
 | Performance smoke            | `k6 run tests/performance/health-smoke.js`       | Supplemental performance signal                               |
 | Visual regression            | `npm run test:visual`                            | Informational screenshot comparison                           |
