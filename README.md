@@ -1,6 +1,28 @@
-# 🎭 Scalable Web Testing Framework Built with Playwright
+<div align="center">
+
+# 🎭 Playwright Testing Framework
 
 ### End-to-end UI and API testing with a composite CI quality gate: functional, accessibility, security, performance, and visual checks
+
+[![Quality Gate](https://github.com/NadiiaSka/playwright-automation-framework/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/yousufwaqar/playwright-automation-framework/actions/workflows/quality-gate.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Playwright](https://img.shields.io/badge/Playwright-1.60+-45ba4b?logo=playwright&logoColor=white)](https://playwright.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/UI%20%2B%20API-Covered-success)](#test-coverage)
+
+<p>
+  <a href="#why-this-framework">Why this framework?</a> |
+  <a href="#quick-start">Quick start</a> |
+  <a href="#architecture">Architecture</a> |
+  <a href="#reporting-and-debugging">Reporting</a> |
+  <a href="#quality-gates">Quality Gates</a>
+</p>
+
+Built by <strong><a href="https://github.com/NadiiaSka">Nadia Sivak</a></strong><br/>
+SDET | QA | Test Analyst | Test Automation Engineer | 10+ years of experience
+<br/><br/>
+
+</div>
 
 ## Preview
 
