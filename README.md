@@ -8,22 +8,27 @@ This testing framework is built around a currency-conversion app: [Currency Exch
 
 ## Why this framework?
 
-This repository is a production-style, scalable testing framework built around
-the currency-conversion app linked above. It combines Vitest and Testing Library
-with Playwright to cover the app's interface, local API, and key quality checks.
+This repository is a production-style, scalable testing framework that can be
+adapted for a wide range of web applications. It combines component,
+integration, API, browser, accessibility, security, performance, and visual
+testing with CI workflows and reporting.
 
-CI starts the app and API locally. Test-controlled responses keep conversion
-scenarios repeatable without relying on the live exchange-rate provider.
+Its reusable test structure and tooling provide a starting point for a new
+application. Adapting it involves replacing the current app-specific tests,
+selectors, API assumptions, and visual baselines.
 
-| What it covers | How it helps |
-| --- | --- |
-| Component and integration behavior | Vitest and Testing Library exercise UI components and multi-step currency-conversion flows |
-| Browser workflows | Playwright checks currency entry, selection, conversion, accessibility, and error states |
-| API and security contracts | Tests cover health and conversion endpoints, invalid inputs, security headers, cross-origin behavior, and oversized requests |
-| Visual regression | A dedicated Chromium suite compares key screens with version-controlled Linux and Windows baselines |
-| Browser compatibility | Chromium, Firefox, and WebKit projects are configured; Firefox and WebKit CI runs are informational |
-| Failure diagnostics | Playwright retains screenshots and videos on failure, traces on retry, and CI reports; Allure adds detailed results and history |
-| Repeatable environments | Vite environment files and a local Node API configure the app for local and CI runs |
+| What it provides          | How it helps                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Layered test coverage     | Separate component, integration, API, browser, accessibility, security, performance, and visual checks |
+| Browser automation        | Playwright projects support Chromium, Firefox, and WebKit                                              |
+| Repeatable test data      | MSW and a local API support deterministic test scenarios                                               |
+| Environment configuration | Vite environment settings support local and CI runs                                                    |
+| Visual regression         | Screenshot comparisons use version-controlled baselines                                                |
+| Failure diagnostics       | HTML and Allure reports, plus screenshots, videos, and traces, help investigate failures               |
+| CI workflows              | Blocking checks provide merge feedback, while informational jobs report additional results             |
+
+For another application, adapt its specific tests and configuration before
+relying on this framework as a complete test suite.
 
 ---
 
@@ -63,21 +68,21 @@ local services and runs the applicable suites.
 
 ### Tech stack
 
-| Tool | Purpose |
-| --- | --- |
-| [React](https://react.dev/), [Vite](https://vite.dev/), [Material UI](https://mui.com/) | Application UI and development/build tooling |
-| [Axios](https://axios-http.com/), [React Query](https://tanstack.com/query/v3/) | API requests and server-state fetching |
-| [world-countries](https://www.npmjs.com/package/world-countries) | Country and currency data for the selector |
-| [Node.js](https://nodejs.org/) 22+ and npm | JavaScript runtime and package management |
-| [Playwright](https://playwright.dev/) | Browser automation, API checks, and visual comparisons |
-| [Vitest](https://vitest.dev/) and [Testing Library](https://testing-library.com/) | Component and integration checks |
-| [MSW](https://mswjs.io/) | HTTP mocks for deterministic API responses |
-| [axe-core](https://github.com/dequelabs/axe-core) with Playwright | Automated accessibility checks |
-| [k6](https://grafana.com/docs/k6/latest/) | HTTP performance smoke and load checks |
-| [Allure Report](https://allurereport.org/) | Detailed results and history for Vitest and Playwright |
-| Java runtime | Required by the Allure CLI |
-| [ESLint](https://eslint.org/) | JavaScript and JSX linting |
-| GitHub Actions | CI checks and downloadable artifacts |
+| Tool                                                                                    | Purpose                                                |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| [React](https://react.dev/), [Vite](https://vite.dev/), [Material UI](https://mui.com/) | Application UI and development/build tooling           |
+| [Axios](https://axios-http.com/), [React Query](https://tanstack.com/query/v3/)         | API requests and server-state fetching                 |
+| [world-countries](https://www.npmjs.com/package/world-countries)                        | Country and currency data for the selector             |
+| [Node.js](https://nodejs.org/) 22+ and npm                                              | JavaScript runtime and package management              |
+| [Playwright](https://playwright.dev/)                                                   | Browser automation, API checks, and visual comparisons |
+| [Vitest](https://vitest.dev/) and [Testing Library](https://testing-library.com/)       | Component and integration checks                       |
+| [MSW](https://mswjs.io/)                                                                | HTTP mocks for deterministic API responses             |
+| [axe-core](https://github.com/dequelabs/axe-core) with Playwright                       | Automated accessibility checks                         |
+| [k6](https://grafana.com/docs/k6/latest/)                                               | HTTP performance smoke and load checks                 |
+| [Allure Report](https://allurereport.org/)                                              | Detailed results and history for Vitest and Playwright |
+| Java runtime                                                                            | Required by the Allure CLI                             |
+| [ESLint](https://eslint.org/)                                                           | JavaScript and JSX linting                             |
+| GitHub Actions                                                                          | CI checks and downloadable artifacts                   |
 
 ---
 
@@ -167,15 +172,15 @@ npm run test:performance:health
 
 The configured test reporters and CI jobs produce these artifacts:
 
-| Artifact | Purpose |
-| --- | --- |
-| Playwright HTML report | Interactive browser results, generated and uploaded in CI |
-| Allure HTML report | Detailed results and history, generated as a CI artifact |
-| Vitest JUnit XML | Machine-readable component and integration results in CI |
-| Allure raw results | Written to `allure-results/` by Vitest and Playwright, including failed runs |
-| Screenshots | Captured on failure; visual checks also compare explicit page snapshots |
-| Traces | Captured on the first retry |
-| Videos | Retained on failure |
+| Artifact               | Purpose                                                                      |
+| ---------------------- | ---------------------------------------------------------------------------- |
+| Playwright HTML report | Interactive browser results, generated and uploaded in CI                    |
+| Allure HTML report     | Detailed results and history, generated as a CI artifact                     |
+| Vitest JUnit XML       | Machine-readable component and integration results in CI                     |
+| Allure raw results     | Written to `allure-results/` by Vitest and Playwright, including failed runs |
+| Screenshots            | Captured on failure; visual checks also compare explicit page snapshots      |
+| Traces                 | Captured on the first retry                                                  |
+| Videos                 | Retained on failure                                                          |
 
 Generate and open the Allure report locally with:
 
@@ -211,34 +216,34 @@ Playwright jobs install the browsers they need.
 These jobs feed the required `quality-gate` status. Dependency review is
 required only for pull requests.
 
-| Job | Script or action | Why it blocks |
-| --- | --- | --- |
-| Lint | `npm run lint` | Enforces JavaScript and JSX code quality |
-| Compile | `npm run build:ci` | Confirms the app builds in CI mode |
-| Unit | `npx vitest run tests/components --outputFile=reports/unit-tests.xml` | Checks component behavior |
-| Integration | `npx vitest run tests/integration --outputFile=reports/integration-tests.xml` | Checks integrated app flows |
-| API contract | `npm run test:api` | Verifies local API responses and validation |
-| Functional | `npm run test:functional` | Checks the main browser conversion flow |
-| Accessibility | `npm run test:accessibility` | Runs browser accessibility checks |
-| Security | `npm run test:security` | Checks local API and HTTP security behavior |
-| Secret scanning | Gitleaks GitHub Action | Detects secrets in repository history |
-| CodeQL | GitHub CodeQL action | Performs JavaScript/TypeScript static analysis |
-| PR dependency review | GitHub dependency-review action | Flags high-severity dependencies in pull requests |
+| Job                  | Script or action                                                              | Why it blocks                                     |
+| -------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------- |
+| Lint                 | `npm run lint`                                                                | Enforces JavaScript and JSX code quality          |
+| Compile              | `npm run build:ci`                                                            | Confirms the app builds in CI mode                |
+| Unit                 | `npx vitest run tests/components --outputFile=reports/unit-tests.xml`         | Checks component behavior                         |
+| Integration          | `npx vitest run tests/integration --outputFile=reports/integration-tests.xml` | Checks integrated app flows                       |
+| API contract         | `npm run test:api`                                                            | Verifies local API responses and validation       |
+| Functional           | `npm run test:functional`                                                     | Checks the main browser conversion flow           |
+| Accessibility        | `npm run test:accessibility`                                                  | Runs browser accessibility checks                 |
+| Security             | `npm run test:security`                                                       | Checks local API and HTTP security behavior       |
+| Secret scanning      | Gitleaks GitHub Action                                                        | Detects secrets in repository history             |
+| CodeQL               | GitHub CodeQL action                                                          | Performs JavaScript/TypeScript static analysis    |
+| PR dependency review | GitHub dependency-review action                                               | Flags high-severity dependencies in pull requests |
 
 ### Non-blocking
 
 These jobs remain visible and upload results, but do not gate merges.
 
-| Job | Script or action | Why it is non-blocking |
-| --- | --- | --- |
-| Dependency audit | `npm audit --audit-level=high` | Report-only dependency risk signal |
-| Performance smoke | `k6 run tests/performance/health-smoke.js` | Supplemental performance signal |
-| Visual regression | `npm run test:visual` | Informational screenshot comparison |
-| k6 load | `k6 run tests/performance/health.js` | Supplemental load and latency signal |
-| Cross-browser | Playwright currency flow on Firefox and WebKit | Additional compatibility signal; Chromium is the primary gate |
-| Allure report | `npm run allure:generate` | Reporting artifact, not a quality check |
-| Pages publish | GitHub Pages actions, on pushes to `master` only | Publishes the report without gating merges |
-| Visual baseline regeneration | Manual `workflow_dispatch` input | Optional baseline update for review |
+| Job                          | Script or action                                 | Why it is non-blocking                                        |
+| ---------------------------- | ------------------------------------------------ | ------------------------------------------------------------- |
+| Dependency audit             | `npm audit --audit-level=high`                   | Report-only dependency risk signal                            |
+| Performance smoke            | `k6 run tests/performance/health-smoke.js`       | Supplemental performance signal                               |
+| Visual regression            | `npm run test:visual`                            | Informational screenshot comparison                           |
+| k6 load                      | `k6 run tests/performance/health.js`             | Supplemental load and latency signal                          |
+| Cross-browser                | Playwright currency flow on Firefox and WebKit   | Additional compatibility signal; Chromium is the primary gate |
+| Allure report                | `npm run allure:generate`                        | Reporting artifact, not a quality check                       |
+| Pages publish                | GitHub Pages actions, on pushes to `master` only | Publishes the report without gating merges                    |
+| Visual baseline regeneration | Manual `workflow_dispatch` input                 | Optional baseline update for review                           |
 
 ## Test design skills
 
