@@ -95,4 +95,16 @@ test.describe("Currency converter end-to-end flow", () => {
       page.getByText(/something went wrong while fetching the conversion/i),
     ).toBeVisible();
   });
+
+  test("TEMP DEMO: fails when the conversion total is incorrect", async ({
+    page,
+  }) => {
+    await page.getByLabel("Amount").fill("100");
+    await selectCurrency(page, "from", "USD - United States");
+    await selectCurrency(page, "to", "UAH - Ukraine");
+
+    await expect(page.getByText(/3,?\s*821.*UAH/i)).toBeVisible({
+      timeout: 1000,
+    });
+  });
 });
