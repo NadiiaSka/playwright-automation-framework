@@ -26,6 +26,7 @@ allure-report/
 *.sw?
 
 # Local secrets
+.env
 .env.*
 !.env.*.example
 !.env.example
