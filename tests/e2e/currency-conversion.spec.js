@@ -1,14 +1,5 @@
 import { test, expect } from "@playwright/test";
-
-const selectCurrency = async (page, fieldName, optionText) => {
-  const field = page.getByRole("combobox", {
-    name: new RegExp(fieldName, "i"),
-  });
-  await field.click();
-  await page
-    .getByRole("option", { name: new RegExp(`^${optionText}$`, "i") })
-    .click();
-};
+import { CurrencyConverterPage } from "../pages/CurrencyConverterPage";
 
 test.describe("Currency converter end-to-end flow", () => {
   test.beforeEach(async ({ page }) => {
@@ -33,46 +24,57 @@ test.describe("Currency converter end-to-end flow", () => {
       });
     });
 
-    await page.goto("/");
+    await new CurrencyConverterPage(page).goto();
   });
 
   test("converts a valid amount and shows the result", async ({ page }) => {
-    await page.getByLabel("Amount").fill("100");
-    await selectCurrency(page, "from", "USD - United States");
-    await selectCurrency(page, "to", "UAH - Ukraine");
+    const converter = new CurrencyConverterPage(page);
+    await converter.fillAmount("100");
+    await converter.selectCurrency("from", "USD - United States");
+    await converter.selectCurrency("to", "UAH - Ukraine");
 
-    await expect(page.getByText(/100 USD/i)).toBeVisible();
-    await expect(page.getByText(/3,?\s*820.*UAH/i)).toBeVisible();
+    await expect(
+      converter.conversionHeadings.filter({ hasText: /100 USD/i }),
+    ).toBeVisible();
+    await expect(
+      converter.conversionHeadings.filter({ hasText: /3,?\s*820.*UAH/i }),
+    ).toBeVisible();
   });
 
   test("swaps the source and target currencies and updates the result", async ({
     page,
   }) => {
-    await page.getByLabel("Amount").fill("100");
-    await selectCurrency(page, "from", "USD - United States");
-    await selectCurrency(page, "to", "UAH - Ukraine");
+    const converter = new CurrencyConverterPage(page);
+    await converter.fillAmount("100");
+    await converter.selectCurrency("from", "USD - United States");
+    await converter.selectCurrency("to", "UAH - Ukraine");
 
-    await page.getByRole("button", { name: /switch currencies/i }).click();
+    await converter.swapCurrencies();
 
-    await expect(page.getByRole("combobox", { name: /from/i })).toHaveValue(
-      /UAH/i,
-    );
-    await expect(page.getByRole("combobox", { name: /to/i })).toHaveValue(
-      /USD/i,
-    );
-    await expect(page.getByText(/100 UAH/i)).toBeVisible();
-    await expect(page.getByText(/2\.62.*USD/i)).toBeVisible();
+    await expect(converter.fromCurrencySelect).toHaveValue(/UAH/i);
+    await expect(converter.toCurrencySelect).toHaveValue(/USD/i);
+    await expect(
+      converter.conversionHeadings.filter({ hasText: /100 UAH/i }),
+    ).toBeVisible();
+    await expect(
+      converter.conversionHeadings.filter({ hasText: /2\.62.*USD/i }),
+    ).toBeVisible();
   });
 
   test("accepts zero as a valid value and shows a zero conversion result", async ({
     page,
   }) => {
-    await page.getByLabel("Amount").fill("0");
-    await selectCurrency(page, "from", "USD - United States");
-    await selectCurrency(page, "to", "UAH - Ukraine");
+    const converter = new CurrencyConverterPage(page);
+    await converter.fillAmount("0");
+    await converter.selectCurrency("from", "USD - United States");
+    await converter.selectCurrency("to", "UAH - Ukraine");
 
-    await expect(page.getByText(/0 USD/i)).toBeVisible();
-    await expect(page.getByText(/0 UAH/i)).toBeVisible();
+    await expect(
+      converter.conversionHeadings.filter({ hasText: /0 USD/i }),
+    ).toBeVisible();
+    await expect(
+      converter.conversionHeadings.filter({ hasText: /0 UAH/i }),
+    ).toBeVisible();
   });
 
   test("shows an error state when the conversion request fails", async ({
@@ -87,12 +89,11 @@ test.describe("Currency converter end-to-end flow", () => {
       });
     });
 
-    await page.getByLabel("Amount").fill("100");
-    await selectCurrency(page, "from", "USD - United States");
-    await selectCurrency(page, "to", "UAH - Ukraine");
+    const converter = new CurrencyConverterPage(page);
+    await converter.fillAmount("100");
+    await converter.selectCurrency("from", "USD - United States");
+    await converter.selectCurrency("to", "UAH - Ukraine");
 
-    await expect(
-      page.getByText(/something went wrong while fetching the conversion/i),
-    ).toBeVisible();
+    await expect(converter.errorMessage).toBeVisible();
   });
 });
