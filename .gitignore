@@ -13,6 +13,7 @@ dist-ssr
 *.local
 allure-results/
 allure-report/
+test-results/
 
 # Editor directories and files
 .vscode/*
@@ -24,6 +25,17 @@ allure-report/
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+*.egg-info/
 
 # Local secrets
 .env
