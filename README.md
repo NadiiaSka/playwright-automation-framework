@@ -276,27 +276,9 @@ are available in the Skills folder: [test-authoring.md](tests/skills/test-author
 and [test-case-design.md](tests/skills/test-case-design.md). They cover
 component, integration, and end-to-end testing.
 
-## AI-Assisted Testing
+## AI-Powered Test Agent
 
-This repository includes an optional Claude-powered SDET assistant in `agent/`.
-It follows the project guidance in `AGENTS.md` and can inspect project files
-and run predefined npm test suites. It is designed to help investigate test
-tasks and report results, not to make autonomous code changes.
-
-The assistant is intentionally tool-limited: it can list and read project files
-and run supported test commands, but it cannot execute arbitrary shell
-commands or modify files. File access is restricted to the repository, and
-environment files are excluded. The assistant must not report a passing test
-unless the command output confirms it.
-
-Set `ANTHROPIC_API_KEY` in your environment, then run the assistant with a task:
-
-```bash
-python -m agent.cli "Review the currency conversion tests"
-```
-
-Set `ANTHROPIC_MODEL` to select a different Anthropic model. This assistant is
-optional and separate from the JavaScript test framework and GitHub Copilot.
+An optional SDET assistant in `agent/` powered by Groq (free tier) can inspect project files, list tests, and run test suites. See [`agent/README.md`](agent/README.md) for setup and usage. Requires a free Groq API key from [console.groq.com](https://console.groq.com).
 
 ## Extending the framework
 
