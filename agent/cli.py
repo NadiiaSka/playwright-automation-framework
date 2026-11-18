@@ -1,11 +1,11 @@
 import argparse
 
-from agent.orchestrator import run_agent
+from agent.orchestrator_groq import run_agent
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Claude-powered SDET assistant"
+        description="Groq SDET assistant (free tier)"
     )
     parser.add_argument(
         "task",
