@@ -42,7 +42,8 @@ This intentionally deterministic locator mismatch demonstrates diagnosis; it
 is not a flaky test. The demo requires the Chrome browser to be installed and
 uses the configured Claude API model.
 
-Run its mocked unit tests with:
+The agent tests require the project npm dependencies (`npm ci`); the demo also
+requires an installed Playwright browser. Run the tests with:
 
 ```powershell
 .venv\Scripts\python.exe -m unittest agent.test_orchestrator
