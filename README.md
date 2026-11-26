@@ -250,6 +250,7 @@ required only for pull requests.
 | Functional           | `npm run test:functional`                                                     | Checks the main browser conversion flow           |
 | Accessibility        | `npm run test:accessibility`                                                  | Runs browser accessibility checks                 |
 | Security             | `npm run test:security`                                                       | Checks local API and HTTP security behavior       |
+| Python agent         | `python -m unittest agent.test_orchestrator`                                  | Checks mocked Claude tool orchestration           |
 | CodeQL               | GitHub CodeQL action                                                          | Performs JavaScript/TypeScript static analysis    |
 | PR dependency review | GitHub dependency-review action                                               | Flags high-severity dependencies in pull requests |
 
@@ -269,6 +270,36 @@ These jobs remain visible and upload results, but do not gate merges.
 | Pages publish                | GitHub Pages actions, on pushes to `master` only | Publishes the report without gating merges                    |
 | Visual baseline regeneration | Manual `workflow_dispatch` input                 | Optional baseline update for review                           |
 
+This JavaScript application has no TypeScript compiler or `typecheck` script;
+`npm run build:ci` is the available compile check. CI also runs the isolated
+Python agent's mocked unit tests. The `quality-gate` job fails if a required job
+fails, is cancelled, or is skipped. Dependency review is required only on pull
+requests.
+
+## AI-assisted development workflow
+
+1. Read [`AGENTS.md`](AGENTS.md) and
+   [Copilot instructions](.github/copilot-instructions.md), then inspect the
+   relevant code, tests, and package scripts.
+2. Implement the smallest root-cause fix and add focused tests with observable
+   assertions. Never weaken or skip assertions to get a passing result.
+3. Run the relevant local test, lint, and build checks; include exact commands
+   and results in the [PR template](.github/PULL_REQUEST_TEMPLATE.md).
+4. A human reviews the diff and blocking CI results before merging. The
+   repository does not enable auto-merge or configure branch protection.
+5. For failures, inspect logs and artifacts, follow
+   [failure triage guidance](tests/skills/flake-triage.md), correct the cause,
+   and push an update for CI to rerun. Optional AI diagnosis is limited to four
+   Playwright suites and is advisory; verify it against the original evidence.
+
+Reusable instructions are available for
+[implementation](tests/skills/implementation-workflow.md),
+[test authoring](tests/skills/test-authoring.md), and
+[failure triage](tests/skills/flake-triage.md). This project has no separate
+type-check job. GitHub repository administrators must manually require the
+`quality-gate` status and human approval in branch protection or rulesets if
+they want those settings enforced; this workflow does not change them.
+
 ## Test design skills
 
 Reusable instructions for authoring tests and designing behavior-based cases
@@ -278,9 +309,15 @@ component, integration, and end-to-end testing.
 
 ## AI-Powered Test Agent
 
-An optional Claude-powered SDET assistant in `agent/` can inspect project files and run supported test suites. See [`agent/README.md`](agent/README.md) for setup and usage; it requires `ANTHROPIC_API_KEY`.
+Optional Claude SDET agent: it can read repository files and run supported
+tests, but cannot edit files; environment files are excluded. See
+[`agent/README.md`](agent/README.md) for setup (`ANTHROPIC_API_KEY`) and usage.
 
-The assistant is intentionally tool limited: it can list and read project files and run supported test commands, but it cannot execute powershell commands or modify files. File access is restricted to the repository, and environment files are excluded. The assistant must not report a passing test unless the command output confirms it.
+To demonstrate a locator failure without changing the working tree, run
+`.\.venv\Scripts\python.exe -m agent --demo-locator-failure`. It breaks the
+`Amount` label locator only in a disposable copy, runs one focused browser test,
+then asks Claude to diagnose and suggest a fix. It does not modify files; this
+is a deterministic failure, not a flake.
 
 ### AI diagnosis in GitHub Actions
 
@@ -297,9 +334,3 @@ To use this framework with another application, configure its local or test
 environment, replace the app-specific selectors and API expectations, and add
 visual baselines for the target screens. Then adjust the required Quality Gate
 checks to match the application's release risks.
-
-## Planned updates
-
-I plan to add version-controlled guidance and reusable prompts for AI coding
-agents, so they can follow this project's conventions and verify changes
-through the Quality Gate.

@@ -82,6 +82,34 @@ class RunAgentTests(unittest.TestCase):
         )
         self.assertIn("Found the test files.", output.getvalue())
 
+    def test_locator_failure_demo_is_confined_to_a_temporary_workspace(self):
+        source_page_object = (
+            orchestrator.project_tools.PROJECT_ROOT
+            / "tests/pages/CurrencyConverterPage.js"
+        )
+        original_source = source_page_object.read_text(encoding="utf-8")
+        temporary_workspace = None
+
+        with (
+            orchestrator.project_tools.create_locator_failure_demo_workspace()
+            as workspace
+        ):
+            temporary_workspace = workspace
+            demo_source = (
+                workspace / "tests/pages/CurrencyConverterPage.js"
+            ).read_text(encoding="utf-8")
+
+            self.assertIn('getByLabel("amountInput")', demo_source)
+            self.assertNotIn('getByLabel("amountInput")', original_source)
+            self.assertTrue((workspace / "node_modules").is_dir())
+            self.assertNotIn(
+                "ANTHROPIC_API_KEY",
+                (workspace / ".env.ci").read_text(encoding="utf-8"),
+            )
+
+        self.assertEqual(source_page_object.read_text(encoding="utf-8"), original_source)
+        self.assertFalse(temporary_workspace.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

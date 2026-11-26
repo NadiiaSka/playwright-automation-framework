@@ -19,6 +19,7 @@
     "allure:report": "npm run allure:generate && npm run allure:open",
     "test:component": "vitest run tests/components",
     "test:integration": "vitest run tests/integration",
+    "test:locator-demo": "playwright test tests/e2e/currency-conversion.spec.js --project=chrome --grep=converts.*result --timeout=10000",
     "test:api": "playwright test tests/api --project=chrome",
     "test:security": "playwright test tests/security --project=chrome",
     "test:functional": "playwright test tests/e2e/currency-conversion.spec.js --project=chrome",

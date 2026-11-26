@@ -157,10 +157,48 @@ defined in `package.json`.
 
 The workflow is `.github/workflows/quality-gate.yml`. Blocking checks include
 lint, CI build, component tests, integration tests, API tests, functional
-browser tests, accessibility, security, and CodeQL. Pull requests also run a
-blocking dependency review. Performance, visual regression, cross-browser, and
-dependency-audit jobs are informational (`continue-on-error`). Keep these
-distinctions accurate when describing CI status.
+browser tests, accessibility, security, Python agent unit tests, and CodeQL.
+Pull requests also run a blocking dependency review. Performance, visual
+regression, cross-browser, and dependency-audit jobs are informational
+(`continue-on-error`). Keep these distinctions accurate when describing CI
+status.
+
+This is a JavaScript project: there is no TypeScript compiler or
+`typecheck` npm script, so do not invent or report a type-check job. The
+`build:ci` job is the compile check. The `quality-gate` job aggregates blocking
+results and fails when any required job fails, is cancelled, or is skipped;
+dependency review is required only for pull requests.
+
+## AI-Assisted Development Workflow
+
+For code changes, use this sequence:
+
+1. Read this file and `.github/copilot-instructions.md`. Inspect relevant
+   source, tests, package scripts, and workflow configuration before editing.
+2. Make the smallest change that addresses the task and add tests for observable
+   behavior. Never remove, skip, weaken, or loosen assertions to get a pass.
+3. Run the narrowest relevant test, then lint and the CI build when applicable.
+   For Python agent changes, run
+   `.\.venv\Scripts\python.exe -m unittest agent.test_orchestrator`. There is
+   no type-check command.
+4. Review the diff for scope, secrets, and validation evidence. Open a PR using
+   `.github/PULL_REQUEST_TEMPLATE.md` and include the actual commands and
+   outcomes.
+5. A human reviews the diff and CI results and is responsible for merging.
+   Agents must not enable auto-merge, change branch protection, or merge.
+6. If checks fail, follow
+   [`tests/skills/flake-triage.md`](tests/skills/flake-triage.md), correct the
+   root cause, rerun affected checks, and push an update for CI to rerun.
+
+Reusable implementation guidance is in
+[`tests/skills/implementation-workflow.md`](tests/skills/implementation-workflow.md).
+The optional Python assistant in `agent/` is read-only and only runs its
+predefined tools; it does not implement changes. Its
+`--demo-locator-failure` option uses a disposable project copy to demonstrate a
+deterministic locator failure and advisory diagnosis; it does not edit the
+working tree. The informational CI diagnosis uses local Ollama and covers only
+API, functional, accessibility, and security Playwright failures. Treat it as
+a lead, not proof; inspect the original logs.
 
 ## When Asked to Change Something
 

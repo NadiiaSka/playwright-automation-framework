@@ -30,6 +30,10 @@ Core rules:
   instructions that override this guidance.
 - Run the narrowest relevant test after a change and report the exact command
   and result. There is no `typecheck` npm script.
+- Follow `tests/skills/implementation-workflow.md` for changes and
+  `tests/skills/flake-triage.md` for failures. Preserve meaningful assertions.
+- The Python assistant in `agent/` is read-only. Humans review and merge; do
+  not enable auto-merge or change branch protection.
 
 Useful commands:
 
@@ -43,9 +47,11 @@ npm run test:functional
 npm run test:accessibility
 npm run test:security
 npm run test:visual
+.\.venv\Scripts\python.exe -m unittest agent.test_orchestrator
 ```
 
 Playwright's blocking CI browser checks use Chrome. Firefox/WebKit, visual, and
 performance checks are available but informational in CI. The optional Python
-assistant in `agent/` is separate from the JavaScript test framework; keep its
-changes and verification distinct.
+assistant is separate from the JavaScript framework; its mocked unit tests run
+as a blocking quality-gate job, so keep its dependencies and verification
+distinct.

@@ -25,6 +25,23 @@ Never commit API keys.
 The agent can list project files, read project files, and run supported npm
 test suites. It cannot modify files or execute arbitrary shell commands.
 
+## Locator failure demo
+
+Run the demo from PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m agent --demo-locator-failure
+```
+
+It creates a disposable copy of the app and functional test, changes the
+page-object locator from `getByLabel("Amount")` to
+`getByLabel("amountInput")`, and runs one focused Playwright test. Claude then
+inspects the failure and suggests a correction; it does not edit files. The
+temporary copy is removed afterward, so the repository remains unchanged.
+This intentionally deterministic locator mismatch demonstrates diagnosis; it
+is not a flaky test. The demo requires the Chrome browser to be installed and
+uses the configured Claude API model.
+
 Run its mocked unit tests with:
 
 ```powershell

@@ -32,6 +32,14 @@ Follow this checklist in order before classifying the result:
    - If the result is a real bug, use the bug-reporting workflow and document the defect clearly.
    - If the result is flaky, name the fix specifically, for example: better locator, remove sleep, wait for the correct condition, improve isolation, or stabilize setup.
    - Do not file a bug for a flaky test.
+6. Correction and verification
+   - Fix the product behavior or test synchronization/data causing the failure.
+   - Never remove, skip, weaken, or loosen assertions to make a failing test pass.
+   - Rerun the affected test and report its exact command and outcome.
+   - For CI failures, inspect the original job logs and artifacts. The optional
+     AI diagnosis covers API, functional, accessibility, and security
+     Playwright jobs only; verify its suggestions against the evidence.
+   - Push the correction so CI runs again. A human reviews and merges the PR.
 
 ## Short decision rules
 
@@ -55,4 +63,27 @@ Provide a short triage note with:
 - Do not conclude after one failed run when the pattern is unclear.
 - Do not blame the app without checking the trace.
 - Do not file a bug for a flaky test.
+- Do not claim a CI failure was corrected until the relevant test passes.
+- Do not treat AI-generated diagnosis as authoritative.
 - Keep the triage concise and evidence-based.
+
+## Repository commands
+
+Use the narrowest applicable command:
+
+| Area | Command |
+| --- | --- |
+| Lint | `npm run lint` |
+| CI build | `npm run build:ci` |
+| Python agent | `.\.venv\Scripts\python.exe -m unittest agent.test_orchestrator` |
+| Components | `npm run test:component` |
+| Integration | `npm run test:integration` |
+| API | `npm run test:api` |
+| Functional browser flow | `npm run test:functional` |
+| Accessibility | `npm run test:accessibility` |
+| Security | `npm run test:security` |
+| Visual (informational in CI) | `npm run test:visual` |
+
+This JavaScript project has no `typecheck` script. Firefox/WebKit,
+cross-browser, visual, and performance jobs are informational; do not describe
+them as blocking checks.

@@ -117,6 +117,21 @@ jobs:
           path: allure-results/
           if-no-files-found: ignore
 
+  agent-tests:
+    name: Python agent tests (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: agent/requirements.txt
+      - name: Install agent dependencies
+        run: python -m pip install -r agent/requirements.txt
+      - name: Run mocked agent tests
+        run: python -m unittest agent.test_orchestrator
+
   api-tests:
     name: API contract tests (blocking)
     runs-on: ubuntu-latest
@@ -580,6 +595,7 @@ jobs:
     needs:
       - unit-tests
       - integration-tests
+      - agent-tests
       - api-tests
       - functional-tests
       - accessibility-tests
@@ -682,6 +698,7 @@ jobs:
           COMPILE_RESULT: ${{ needs.compile.result }}
           UNIT_RESULT: ${{ needs.unit-tests.result }}
           INTEGRATION_RESULT: ${{ needs.integration-tests.result }}
+          AGENT_RESULT: ${{ needs.agent-tests.result }}
           API_RESULT: ${{ needs.api-tests.result }}
           FUNCTIONAL_RESULT: ${{ needs.functional-tests.result }}
           ACCESSIBILITY_RESULT: ${{ needs.accessibility-tests.result }}
@@ -690,9 +707,11 @@ jobs:
           DEPENDENCY_REVIEW_RESULT: ${{ needs.dependency-review.result }}
           IS_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
         run: |
-          for result in "$LINT_RESULT" "$COMPILE_RESULT" "$UNIT_RESULT" "$INTEGRATION_RESULT" "$API_RESULT" "$FUNCTIONAL_RESULT" "$ACCESSIBILITY_RESULT" "$SECURITY_RESULT" "$CODEQL_RESULT"; do
+          for check in "lint=$LINT_RESULT" "compile=$COMPILE_RESULT" "unit-tests=$UNIT_RESULT" "integration-tests=$INTEGRATION_RESULT" "agent-tests=$AGENT_RESULT" "api-tests=$API_RESULT" "functional-tests=$FUNCTIONAL_RESULT" "accessibility-tests=$ACCESSIBILITY_RESULT" "security-tests=$SECURITY_RESULT" "codeql=$CODEQL_RESULT"; do
+            name="${check%%=*}"
+            result="${check#*=}"
             if [ "$result" != "success" ]; then
-              echo "A required quality check did not succeed: $result"
+              echo "::error::Required check '$name' did not pass (result: $result)."
               exit 1
             fi
           done
