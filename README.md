@@ -260,7 +260,7 @@ These jobs remain visible and upload results, but do not gate merges.
 
 | Job                          | Script or action                                 | Why it is non-blocking                                        |
 | ---------------------------- | ------------------------------------------------ | ------------------------------------------------------------- |
-| Secret scanning              | Gitleaks GitHub Action                           | Reports historical secret findings without gating merges      |
+| Secret scanning              | Gitleaks GitHub Action                           | Reports secret findings without gating merges                 |
 | Dependency audit             | `npm audit --audit-level=high`                   | Report-only dependency risk signal                            |
 | Performance smoke            | `k6 run tests/performance/health-smoke.js`       | Supplemental performance signal                               |
 | Visual regression            | `npm run test:visual`                            | Informational screenshot comparison                           |
@@ -269,6 +269,10 @@ These jobs remain visible and upload results, but do not gate merges.
 | Allure report                | `npm run allure:generate`                        | Reporting artifact, not a quality check                       |
 | Pages publish                | GitHub Pages actions, on pushes to `master` only | Publishes the report without gating merges                    |
 | Visual baseline regeneration | Manual `workflow_dispatch` input                 | Optional baseline update for review                           |
+
+Gitleaks ignores two historical findings for rotated keys via their exact
+fingerprints in [`.gitleaksignore`](.gitleaksignore); new findings remain
+visible and must be investigated.
 
 This JavaScript application has no TypeScript compiler or `typecheck` script;
 `npm run build:ci` is the available compile check. CI also runs the isolated
