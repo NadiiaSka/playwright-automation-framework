@@ -278,6 +278,48 @@ requests.
 
 ## AI-assisted development workflow
 
+```mermaid
+flowchart TD
+    A["👩‍💻 Developer<br/>Defines task"] --> B
+
+    subgraph AGENT["🤖 AI Agent"]
+        direction TB
+        B["Read repo rules<br/>and inspect code"] --> C["Implement change<br/>and focused tests"]
+        C --> D["Run local checks"]
+        D --> E{"Pass?"}
+        E -- "No: fix root cause" --> C
+    end
+
+    E -- Yes --> F["📋 Pull request<br/>Human review"]
+    F --> G
+
+    subgraph CI["🚦 GitHub Actions"]
+        direction TB
+        G["Blocking gate<br/>Lint · Build · Component/Integration · Agent<br/>API · Functional · Accessibility · Security · CodeQL"]
+        H["Non-blocking signals<br/>Performance · Visual · k6<br/>Cross-browser"]
+    end
+
+    F -.-> H
+    G --> I{"Gate passes?"}
+    I -- No --> C
+    I -- Yes --> J["✅ Developer merges"]
+    H -. "Reports and feedback" .-> F
+    J --> A
+
+    classDef human fill:#dbeafe,stroke:#2563eb,color:#172554,stroke-width:2px
+    classDef agent fill:#ede9fe,stroke:#7c3aed,color:#2e1065,stroke-width:2px
+    classDef check fill:#fef3c7,stroke:#d97706,color:#451a03,stroke-width:2px
+    classDef gate fill:#fce7f3,stroke:#db2777,color:#500724,stroke-width:2px
+    classDef done fill:#dcfce7,stroke:#16a34a,color:#052e16,stroke-width:2px
+    class A,F human
+    class B,C,D agent
+    class E,I check
+    class G,H gate
+    class J done
+    style AGENT fill:#faf5ff,stroke:#a78bfa,color:#3b0764
+    style CI fill:#fff7ed,stroke:#fb923c,color:#431407
+```
+
 1. Read [`AGENTS.md`](AGENTS.md) and
    [Copilot instructions](.github/copilot-instructions.md), then inspect the
    relevant code, tests, and package scripts.
