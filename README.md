@@ -278,7 +278,7 @@ component, integration, and end-to-end testing.
 
 ## AI-Powered Test Agent
 
-An optional SDET assistant in `agent/` powered by Groq (free tier) can inspect project files, list tests, and run test suites. See [`agent/README.md`](agent/README.md) for setup and usage. Requires a free Groq API key from [console.groq.com](https://console.groq.com).
+An optional Claude-powered SDET assistant in `agent/` can inspect project files and run supported test suites. See [`agent/README.md`](agent/README.md) for setup and usage; it requires `ANTHROPIC_API_KEY`.
 
 The assistant is intentionally tool limited: it can list and read project files and run supported test commands, but it cannot execute powershell commands or modify files. File access is restricted to the repository, and environment files are excluded. The assistant must not report a passing test unless the command output confirms it.
 
