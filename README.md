@@ -282,6 +282,15 @@ An optional SDET assistant in `agent/` powered by Groq (free tier) can inspect p
 
 The assistant is intentionally tool limited: it can list and read project files and run supported test commands, but it cannot execute powershell commands or modify files. File access is restricted to the repository, and environment files are excluded. The assistant must not report a passing test unless the command output confirms it.
 
+### AI diagnosis in GitHub Actions
+
+When a blocking API, functional, accessibility, or security Playwright job
+fails, an informational Ollama job summarizes its logs and relevant test files
+in the job summary and `ai-playwright-diagnosis` artifact. Review AI output
+against the logs; it cannot change test results. This is not Playwright Healer
+and does not cover Vitest, visual, or performance tests. Avoid secrets in test
+output.
+
 ## Extending the framework
 
 To use this framework with another application, configure its local or test

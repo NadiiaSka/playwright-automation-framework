@@ -132,7 +132,10 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
       - name: Run API tests
-        run: npm run test:api
+        run: |
+          set -o pipefail
+          mkdir -p diagnostics
+          npm run test:api 2>&1 | tee diagnostics/api.log
       - name: Upload API reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -141,6 +144,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            diagnostics/
           if-no-files-found: ignore
       - name: Upload Allure raw results
         if: always()
@@ -164,7 +168,11 @@ jobs:
       - run: npm ci
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - run: npm run test:functional
+      - name: Run functional tests
+        run: |
+          set -o pipefail
+          mkdir -p diagnostics
+          npm run test:functional 2>&1 | tee diagnostics/functional.log
       - name: Upload functional reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -173,6 +181,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            diagnostics/
           if-no-files-found: ignore
       - name: Upload Allure raw results
         if: always()
@@ -196,7 +205,11 @@ jobs:
       - run: npm ci
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - run: npm run test:accessibility
+      - name: Run accessibility tests
+        run: |
+          set -o pipefail
+          mkdir -p diagnostics
+          npm run test:accessibility 2>&1 | tee diagnostics/accessibility.log
       - name: Upload accessibility reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -205,6 +218,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            diagnostics/
           if-no-files-found: ignore
       - name: Upload Allure raw results
         if: always()
@@ -229,7 +243,10 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
       - name: Run application security tests
-        run: npm run test:security
+        run: |
+          set -o pipefail
+          mkdir -p diagnostics
+          npm run test:security 2>&1 | tee diagnostics/security.log
       - name: Upload security reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -238,6 +255,7 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            diagnostics/
           if-no-files-found: ignore
       - name: Upload Allure raw results
         if: always()
@@ -246,6 +264,63 @@ jobs:
           name: allure-results-${{ github.job }}
           path: allure-results/
           if-no-files-found: ignore
+
+  ai-playwright-diagnosis:
+    name: AI Playwright diagnosis (informational)
+    if: ${{ !cancelled() && (needs.api-tests.result == 'failure' || needs.functional-tests.result == 'failure' || needs.accessibility-tests.result == 'failure' || needs.security-tests.result == 'failure') }}
+    needs: [api-tests, functional-tests, accessibility-tests, security-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: true
+    permissions:
+      contents: read
+    services:
+      ollama:
+        image: ollama/ollama:0.6.8
+        ports:
+          - 11434:11434
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download Playwright reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*-reports"
+          path: diagnostic-input
+      - name: Download local model
+        run: |
+          set -o pipefail
+          curl --fail --silent --show-error --retry 20 --retry-connrefused \
+            --retry-delay 2 --retry-max-time 60 http://127.0.0.1:11434/api/version
+          curl --fail --silent --show-error --max-time 600 \
+            http://127.0.0.1:11434/api/pull \
+            -d '{"model":"qwen2.5:1.5b","stream":false}' | jq -e '.status == "success"'
+      - name: Diagnose failed Playwright jobs
+        env:
+          API_RESULT: ${{ needs.api-tests.result }}
+          FUNCTIONAL_RESULT: ${{ needs.functional-tests.result }}
+          ACCESSIBILITY_RESULT: ${{ needs.accessibility-tests.result }}
+          SECURITY_RESULT: ${{ needs.security-tests.result }}
+        run: |
+          failed=()
+          for suite in api functional accessibility security; do
+            variable="${suite^^}_RESULT"
+            if [ "${!variable}" = "failure" ]; then failed+=("$suite"); fi
+          done
+          export FAILED_SUITES="$(IFS=,; echo "${failed[*]}")"
+          node scripts/diagnose-playwright.js
+          cat ai-diagnosis.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload AI diagnosis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-playwright-diagnosis
+          path: ai-diagnosis.md
+          if-no-files-found: warn
 
   dependency-audit:
     name: High-severity dependency audit (informational)
