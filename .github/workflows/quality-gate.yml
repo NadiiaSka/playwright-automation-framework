@@ -691,6 +691,7 @@ jobs:
       - compile
       - unit-tests
       - integration-tests
+      - agent-tests
       - api-tests
       - functional-tests
       - accessibility-tests
