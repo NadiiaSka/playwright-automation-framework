@@ -1,8 +1,20 @@
 import { spawn } from "node:child_process";
 import { loadEnv } from "vite";
 
-const mode = process.argv[2] || "local";
+const mode = process.argv[2] || "development";
 const env = loadEnv(mode, process.cwd(), "");
+const requiredVariables = ["VITE_APP_HOST", "VITE_APP_PORT", "VITE_API_PORT"];
+const missingVariables = requiredVariables.filter((name) => !env[name]);
+
+if (missingVariables.length > 0) {
+  const example =
+    mode === "development" ? ".env.local.example" : `.env.${mode}.example`;
+  throw new Error(
+    `Missing startup configuration: ${missingVariables.join(", ")}. ` +
+      `Set these variables or copy ${example} to the corresponding environment file.`,
+  );
+}
+
 const children = [];
 
 const childEnv = {

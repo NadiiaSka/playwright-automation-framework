@@ -3,8 +3,11 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0 || >=26.0.0"
+  },
   "scripts": {
-    "dev": "node scripts/start-local.js local",
+    "dev": "node scripts/start-local.js",
     "dev:ci": "node scripts/start-local.js ci",
     "build": "vite build --mode production",
     "build:ci": "vite build --mode ci",
@@ -57,18 +60,18 @@
     "@testing-library/user-event": "^14.6.7",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
-    "@vitejs/plugin-react": "^4.2.1",
-    "@vitest/runner": "^1.6.1",
+    "@vitejs/plugin-react": "^6.3.0",
+    "@vitest/runner": "^4.1.11",
     "allure-commandline": "^2.46.1",
     "allure-playwright": "^2.15.1",
-    "allure-vitest": "^2.15.1",
+    "allure-vitest": "^3.15.0",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
     "jsdom": "^29.1.1",
     "msw": "^2.15.0",
-    "vite": "^5.1.0",
-    "vitest": "^1.6.1"
+    "vite": "^8.4.0",
+    "vitest": "^5.1.2"
   }
 }

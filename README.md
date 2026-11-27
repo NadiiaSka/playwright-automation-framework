@@ -7,7 +7,7 @@
 [![Quality Gate](https://github.com/NadiiaSka/playwright-automation-framework/actions/workflows/quality-gate.yml/badge.svg)](https://github.com/yousufwaqar/playwright-automation-framework/actions/workflows/quality-gate.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Playwright](https://img.shields.io/badge/Playwright-1.60+-45ba4b?logo=playwright&logoColor=white)](https://playwright.dev/)
-[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22.13%2B-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 [![Tests](https://img.shields.io/badge/UI%20%2B%20API-Covered-success)](#test-coverage)
 
 <p>
@@ -95,7 +95,7 @@ local services and runs the applicable suites.
 | [React](https://react.dev/), [Vite](https://vite.dev/), [Material UI](https://mui.com/) | Application UI and development/build tooling           |
 | [Axios](https://axios-http.com/), [React Query](https://tanstack.com/query/v3/)         | API requests and server-state fetching                 |
 | [world-countries](https://www.npmjs.com/package/world-countries)                        | Country and currency data for the selector             |
-| [Node.js](https://nodejs.org/) 22+ and npm                                              | JavaScript runtime and package management              |
+| [Node.js](https://nodejs.org/) and npm                                                  | JavaScript runtime and package management              |
 | [Playwright](https://playwright.dev/)                                                   | Browser automation, API checks, and visual comparisons |
 | [Vitest](https://vitest.dev/) and [Testing Library](https://testing-library.com/)       | Component and integration checks                       |
 | [MSW](https://mswjs.io/)                                                                | HTTP mocks for deterministic API responses             |
@@ -117,7 +117,7 @@ node --version
 npm --version
 ```
 
-- Node.js 22 or higher
+- Node.js 22.13+ (22.x), 24.x, or 26+
 - npm, included with Node.js (no `.nvmrc` is provided)
 
 ### Install
@@ -139,6 +139,10 @@ Copy-Item .env.ci.example .env.ci
 Playwright starts the local Vite app and Node API using the CI environment
 configuration. Conversion responses in browser tests are deterministic; the
 live exchange-rate provider is not required.
+
+To run the app locally, copy `.env.local.example` to `.env.local` and run
+`npm run dev`. Local development uses the live exchange-rate provider. CI uses
+the local API, which has fixed rates for USD, EUR, GBP, and UAH.
 
 ### Run the main test suites
 

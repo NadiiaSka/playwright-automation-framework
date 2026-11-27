@@ -13,7 +13,7 @@ export const fetchCurrencyConversion = async (
 ) => {
   if (useLocalCurrencyApi) {
     const response = await axios.post(exchangeRateUrl, {
-      amount: firstAmount,
+      amount: Number(firstAmount),
       from: codeFromCurrency,
       to: codeToCurrency,
     });

@@ -104,7 +104,8 @@ package.json             npm scripts and JavaScript dependencies
 
 ## Commands
 
-Requires Node.js 22+ and npm. Install dependencies and browser binaries with:
+Requires Node.js 22.13+ (22.x), 24.x, or 26+ and npm. Install dependencies and
+browser binaries with:
 
 ```powershell
 npm ci

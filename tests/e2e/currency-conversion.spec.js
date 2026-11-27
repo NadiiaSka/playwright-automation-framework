@@ -97,3 +97,27 @@ test.describe("Currency converter end-to-end flow", () => {
     await expect(converter.errorMessage).toBeVisible();
   });
 });
+
+test("converts a valid amount through the local API", async ({ page }) => {
+  const converter = new CurrencyConverterPage(page);
+  await converter.goto();
+  await converter.fillAmount("100");
+  await converter.selectCurrency("from", "USD - United States");
+  const responsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/convert") &&
+      response.request().method() === "POST",
+  );
+  await converter.selectCurrency("to", "UAH - Ukraine");
+
+  const response = await responsePromise;
+  expect(response.status()).toBe(200);
+  expect(response.request().postDataJSON()).toEqual({
+    amount: 100,
+    from: "USD",
+    to: "UAH",
+  });
+  await expect(
+    converter.conversionHeadings.filter({ hasText: /3,?\s*820.*UAH/i }),
+  ).toBeVisible();
+});

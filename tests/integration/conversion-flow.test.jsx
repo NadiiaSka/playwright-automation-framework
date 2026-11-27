@@ -70,6 +70,40 @@ describe("currency flow", () => {
     });
   });
 
+  it("requests a conversion from the exchange-rate provider", async () => {
+    const user = userEvent.setup();
+    let requestUrl;
+    server.use(
+      http.get("https://api.fxratesapi.com/latest", ({ request }) => {
+        requestUrl = new URL(request.url);
+        return HttpResponse.json({ rates: { AUD: 15.5 } });
+      }),
+    );
+    renderApp();
+
+    await user.type(screen.getByRole("textbox", { name: /amount/i }), "265.40");
+    await selectCountry({
+      label: /from/i,
+      optionName: "^UAH - Ukraine$",
+      user,
+    });
+    await selectCountry({
+      label: /to/i,
+      optionName: "^AUD - Australia$",
+      user,
+    });
+
+    expect(await screen.findByText(/15\.5 AUD/i)).toBeInTheDocument();
+    expect(Object.fromEntries(requestUrl.searchParams)).toEqual({
+      amount: "265.40",
+      base: "UAH",
+      currencies: "AUD",
+      resolution: "1m",
+      places: "6",
+      format: "json",
+    });
+  });
+
   it("accepts zero as a valid amount and shows a zero conversion result", async () => {
     const user = userEvent.setup();
     renderApp();

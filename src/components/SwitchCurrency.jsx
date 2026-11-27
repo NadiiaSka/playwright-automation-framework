@@ -1,5 +1,5 @@
 import { Button, Grid } from "@mui/material";
-import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
+import { CompareArrows as CompareArrowsIcon } from "@mui/icons-material";
 import { CurrencyContext } from "../context/CurrencyContext";
 import { useContext } from "react";
 
